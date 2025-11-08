@@ -27,8 +27,6 @@ export class BoardController {
   private lastLegalMap: Map<string, string[]> | null = null;
   private lastPremoveMap: Map<string, string[]> | null = null;
   private lastSelectTs: number = 0;
-  private lastLegalSetTs: number = 0;
-  private lastPremoveSetTs: number = 0;
 
   constructor(el: HTMLElement, callbacks: BoardCallbacks) {
     this.el = el;
@@ -44,13 +42,19 @@ export class BoardController {
         coordinates: opts.coordinates !== false,
         animation: { enabled: true, duration: animationMs },
         blockTouchScroll: opts.blockTouchScroll !== false,
-        draggable: { enabled: true, distance: 3, autoDistance: true, showGhost: true },
-        movable: { color: opts.playerColor || 'both', free: true, showDests: true },
+        draggable: { enabled: true, distance: 0, autoDistance: true, showGhost: true },
+        selectable: { enabled: true },
+        movable: { color: opts.playerColor || 'both', free: false, showDests: true },
         premovable: { enabled: true, showDests: true, castle: true },
         highlight: { lastMove: true, check: true },
         events: {
           move: (orig: Square, dest: Square) => {
             this.callbacks.onMove({ from: orig, to: dest });
+            // Clear any highlights after a successful move
+            this.cg.set({ movable: { dests: undefined, showDests: true } });
+            this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+            this.lastLegalMap = null;
+            this.lastPremoveMap = null;
           },
           select: (key?: string) => {
             if (!this.callbacks.onSelect) return;
@@ -93,20 +97,23 @@ export class BoardController {
 
   setLegalDests(dests: LegalDests) {
     if (!this.cg) return;
-    if (!dests || dests.length === 0) {
-      // Avoid flicker: ignore clears arriving immediately after a set
-      if (Date.now() - this.lastLegalSetTs < 200) return;
-      // Clear to restore default behavior (no restriction)
-      this.cg.set({ movable: { dests: undefined, showDests: true } });
-      this.lastLegalMap = null;
-      return;
+    if (!dests || dests.length === 0) return; // Ignore empty clears; persist dots
+    // Filter out destinations that are currently occupied by a same-color piece in cg state
+    const filtered = new Map<string, string[]>();
+    const pieces: Map<string, any> | undefined = (this.cg as any)?.state?.pieces;
+    for (const [orig, tos] of dests) {
+      const originPiece = pieces?.get(orig);
+      const clean = tos.filter(to => {
+        const destPiece = pieces?.get(to);
+        return !destPiece || !originPiece || destPiece.color !== originPiece.color;
+      });
+      if (clean.length > 0) filtered.set(orig, clean);
     }
-    const map = new Map<string, string[]>(dests);
-    this.cg.set({ movable: { dests: map, showDests: true } });
+    this.cg.set({ movable: { dests: filtered, showDests: true } });
     // Ensure premove dots are not shown concurrently
     this.cg.set({ premovable: { customDests: undefined, showDests: true } });
-    this.lastLegalMap = map;
-    this.lastLegalSetTs = Date.now();
+    this.lastLegalMap = filtered;
+    // timestamp no longer used
     this.lastPremoveMap = null;
   }
 
@@ -132,18 +139,13 @@ export class BoardController {
 
   setPremoveDests(dests: Array<[Square, Square[]]>) {
     if (!this.cg) return;
-    if (!dests || dests.length === 0) {
-      if (Date.now() - this.lastPremoveSetTs < 200) return;
-      this.cg.set({ premovable: { customDests: undefined, showDests: true } });
-      this.lastPremoveMap = null;
-      return;
-    }
+    if (!dests || dests.length === 0) return; // Ignore empty clears; persist dots
     const map = new Map<string, string[]>(dests);
     this.cg.set({ premovable: { customDests: map, showDests: true } });
     // Ensure legal dots are not shown concurrently
     this.cg.set({ movable: { dests: undefined, showDests: true } });
     this.lastPremoveMap = map;
-    this.lastPremoveSetTs = Date.now();
+    // timestamp no longer used
     this.lastLegalMap = null;
   }
 
