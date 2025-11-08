@@ -16,6 +16,34 @@ let parentWindow: Window | null = null;
 // Board
 let controller: BoardController | null = null;
 let initializedByParent = false;
+let customStyleEl: HTMLStyleElement | null = null;
+
+function applyTheme(name?: string) {
+  const body = document.body;
+  body.classList.remove('theme-pc30');
+  if (name === 'pc30') body.classList.add('theme-pc30');
+}
+
+function applyCustomPieceImages(map?: Record<string, string>) {
+  if (customStyleEl) {
+    try { customStyleEl.remove(); } catch {}
+    customStyleEl = null;
+  }
+  if (!map || !Object.keys(map).length) return;
+  const rules: string[] = [];
+  for (const key of Object.keys(map)) {
+    const url = map[key];
+    // key format: '<piece>.<color>' e.g. 'bishop.white'
+    const [piece, color] = key.split('.') as [string, string];
+    if (!piece || !color) continue;
+    rules.push(`.cg-wrap piece.${piece}.${color} { background-image: url('${url}') !important; }`);
+  }
+  const style = document.createElement('style');
+  style.id = 'custom-piece-images';
+  style.textContent = rules.join('\n');
+  document.head.appendChild(style);
+  customStyleEl = style;
+}
 
 function post(type: string, payload: any) {
   const target = parentWindow || (typeof window !== 'undefined' ? window.parent : null);
@@ -88,6 +116,15 @@ window.addEventListener('message', (evt: MessageEvent) => {
         });
         if (id) ack(id, true);
         initializedByParent = true;
+        // If parent provided theme on init
+        if (payload?.theme?.name) applyTheme(payload.theme.name);
+        if (payload?.theme?.pieceImages) applyCustomPieceImages(payload.theme.pieceImages);
+        break;
+      }
+      case 'setTheme': {
+        applyTheme(payload?.name);
+        applyCustomPieceImages(payload?.pieceImages);
+        if (id) ack(id, true);
         break;
       }
       case 'setPosition': {
@@ -163,6 +200,12 @@ window.addEventListener('message', (evt: MessageEvent) => {
 // Notify parent that the iframe booted and is ready to be init()
 window.addEventListener('load', () => {
   console.log('[MFE] window load, sending hello');
+  // Theme via query param
+  try {
+    const usp = new URLSearchParams(window.location.search);
+    const theme = usp.get('theme');
+    if (theme) applyTheme(theme);
+  } catch {}
   // Send "hello" without strict origin; parent should reply with init
   post('hello', { version: VERSION });
   // Fallback: if no parent initializes within 1000ms, self-init with a default board for debugging

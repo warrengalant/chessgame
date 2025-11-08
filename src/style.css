@@ -16,3 +16,25 @@ body {
   display: block;
   line-height: 1;
 }
+
+/* Prefer square board sizing when host doesn't force dimensions */
+#board-root {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+/* Ensure raster images scale nicely */
+.cg-wrap piece {
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* pc30 theme: replace bishops with dragon bishop sprites */
+body.theme-pc30 .cg-wrap piece.bishop.white {
+  background-image: url('/pieces/pc30/white/dragon_bishop.png') !important;
+}
+body.theme-pc30 .cg-wrap piece.bishop.black {
+  background-image: url('/pieces/pc30/black/dragon_bishop.png') !important;
+}
