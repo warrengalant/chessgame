@@ -15,10 +15,13 @@ let parentWindow: Window | null = null;
 
 // Board
 let controller: BoardController | null = null;
+let initializedByParent = false;
 
 function post(type: string, payload: any) {
-  if (!parentWindow) return;
-  parentWindow.postMessage({ type, version: VERSION, ts: Date.now(), payload }, allowedOrigin === '*' ? '*' : allowedOrigin);
+  const target = parentWindow || (typeof window !== 'undefined' ? window.parent : null);
+  if (!target) return;
+  const targetOrigin = allowedOrigin === '*' ? '*' : allowedOrigin;
+  target.postMessage({ type, version: VERSION, ts: Date.now(), payload }, targetOrigin);
 }
 
 function ack(forId: string, ok = true, error?: string) {
@@ -38,9 +41,11 @@ function ensureBoard() {
   mount.setAttribute('data-chessground', '');
   mount.style.width = '100%';
   mount.style.height = '100%';
+  mount.style.overflow = 'hidden';
   // mobile friendly sizing
   (root as HTMLElement).style.width = '100%';
-  (root as HTMLElement).style.height = '100svh';
+  (root as HTMLElement).style.height = '100%';
+  (root as HTMLElement).style.overflow = 'hidden';
   (root as HTMLElement).style.touchAction = 'none';
   root.appendChild(mount);
 
@@ -54,6 +59,7 @@ function ensureBoard() {
 }
 
 window.addEventListener('message', (evt: MessageEvent) => {
+  console.log('[MFE] message received from', evt.origin, evt.data?.type);
   // Origin check
   if (allowedOrigin !== '*' && evt.origin !== allowedOrigin) {
     // Ignore unexpected origins once allowlist is set
@@ -68,6 +74,7 @@ window.addEventListener('message', (evt: MessageEvent) => {
   try {
     switch (type) {
       case 'init': {
+        console.log('[MFE] init received from', evt.origin, payload);
         // First message defines allowed origin implicitly
         allowedOrigin = evt.origin || '*';
         const opts = (payload?.options || {}) as InitOptions;
@@ -80,29 +87,35 @@ window.addEventListener('message', (evt: MessageEvent) => {
           playerColor: opts.playerColor || 'both',
         });
         if (id) ack(id, true);
+        initializedByParent = true;
         break;
       }
       case 'setPosition': {
+        console.log('[MFE] setPosition', payload?.fen, payload?.lastMove);
         ensureBoard().setPosition(payload);
         if (id) ack(id, true);
         break;
       }
       case 'setLegalDests': {
+        console.log('[MFE] setLegalDests', payload?.dests ? 'len=' + payload.dests.length : 'none');
         ensureBoard().setLegalDests(payload?.dests || []);
         if (id) ack(id, true);
         break;
       }
       case 'setTurn': {
+        console.log('[MFE] setTurn', payload?.color);
         ensureBoard().setTurn(payload?.color);
         if (id) ack(id, true);
         break;
       }
       case 'setDraggable': {
+        console.log('[MFE] setDraggable', payload);
         ensureBoard().setDraggable(!!payload?.enabled, payload?.playerColor || 'both');
         if (id) ack(id, true);
         break;
       }
       case 'setFreeMode': {
+        console.log('[MFE] setFreeMode', payload?.free);
         ensureBoard().setFreeMode(!!payload?.free);
         if (id) ack(id, true);
         break;
@@ -138,6 +151,7 @@ window.addEventListener('message', (evt: MessageEvent) => {
         break;
       }
       default:
+        console.warn('[MFE] unknown message', type);
         if (id) ack(id, false, `Unknown type ${type}`);
     }
   } catch (e: any) {
@@ -148,6 +162,20 @@ window.addEventListener('message', (evt: MessageEvent) => {
 
 // Notify parent that the iframe booted and is ready to be init()
 window.addEventListener('load', () => {
+  console.log('[MFE] window load, sending hello');
   // Send "hello" without strict origin; parent should reply with init
   post('hello', { version: VERSION });
+  // Fallback: if no parent initializes within 1000ms, self-init with a default board for debugging
+  setTimeout(() => {
+    if (!initializedByParent) {
+      console.log('[MFE] No parent init received; self-initializing for debug');
+      const board = ensureBoard();
+      board.init({ orientation: 'white', coordinates: true, animationMs: 200, blockTouchScroll: true, playerColor: 'both' });
+      board.setPosition({
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
+        turnColor: 'white',
+        orientation: 'white',
+      } as any);
+    }
+  }, 1000);
 });
