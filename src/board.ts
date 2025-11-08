@@ -110,8 +110,17 @@ export class BoardController {
   }
 
   setSize(width: number, height: number) {
-    this.el.style.width = `${width}px`;
-    this.el.style.height = `${height}px`;
+    if (width && width > 0) {
+      this.el.style.width = `${width}px`;
+    } else {
+      // Let CSS decide (100%/aspect-ratio)
+      this.el.style.removeProperty('width');
+    }
+    if (height && height > 0) {
+      this.el.style.height = `${height}px`;
+    } else {
+      this.el.style.removeProperty('height');
+    }
   }
 
   destroy() {

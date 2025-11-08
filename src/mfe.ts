@@ -176,6 +176,8 @@ window.addEventListener('load', () => {
         turnColor: 'white',
         orientation: 'white',
       } as any);
+      // Allow free dragging when running standalone so users can move pieces
+      board.setFreeMode(true);
     }
   }, 1000);
 });
