@@ -73,8 +73,13 @@ export class BoardController {
 
   setLegalDests(dests: LegalDests) {
     if (!this.cg) return;
+    if (!dests || dests.length === 0) {
+      // Clear to restore default behavior (no restriction)
+      this.cg.set({ movable: { dests: undefined, showDests: true } });
+      return;
+    }
     const map = new Map<string, string[]>(dests);
-    this.cg.set({ movable: { dests: map, showDests: true, free: false } });
+    this.cg.set({ movable: { dests: map, showDests: true } });
   }
 
   setTurn(color: Color) {
@@ -94,6 +99,10 @@ export class BoardController {
 
   setPremoveDests(dests: Array<[Square, Square[]]>) {
     if (!this.cg) return;
+    if (!dests || dests.length === 0) {
+      this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+      return;
+    }
     const map = new Map<string, string[]>(dests);
     this.cg.set({ premovable: { customDests: map, showDests: true } });
   }
