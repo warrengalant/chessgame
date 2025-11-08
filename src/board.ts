@@ -24,6 +24,11 @@ export class BoardController {
   private el: HTMLElement;
   private cg: any | null = null;
   private callbacks: BoardCallbacks;
+  private lastLegalMap: Map<string, string[]> | null = null;
+  private lastPremoveMap: Map<string, string[]> | null = null;
+  private lastSelectTs: number = 0;
+  private lastLegalSetTs: number = 0;
+  private lastPremoveSetTs: number = 0;
 
   constructor(el: HTMLElement, callbacks: BoardCallbacks) {
     this.el = el;
@@ -40,7 +45,7 @@ export class BoardController {
         animation: { enabled: true, duration: animationMs },
         blockTouchScroll: opts.blockTouchScroll !== false,
         draggable: { enabled: true, distance: 3, autoDistance: true, showGhost: true },
-        movable: { color: opts.playerColor || 'both', free: false, showDests: true },
+        movable: { color: opts.playerColor || 'both', free: true, showDests: true },
         premovable: { enabled: true, showDests: true, castle: true },
         highlight: { lastMove: true, check: true },
         events: {
@@ -49,7 +54,19 @@ export class BoardController {
           },
           select: (key?: string) => {
             if (!this.callbacks.onSelect) return;
-            this.callbacks.onSelect(key || null);
+            if (key) {
+              this.lastSelectTs = Date.now();
+              this.callbacks.onSelect(key);
+            } else {
+              // Ignore immediate deselects right after a select to prevent flicker
+              if (Date.now() - this.lastSelectTs < 200) return;
+              this.callbacks.onSelect(null);
+              // Clear dots locally on user deselect
+              this.cg.set({ movable: { dests: undefined, showDests: true } });
+              this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+              this.lastLegalMap = null;
+              this.lastPremoveMap = null;
+            }
           },
         },
       });
@@ -69,17 +86,28 @@ export class BoardController {
       ...(payload.orientation ? { orientation: payload.orientation } : {}),
     };
     this.cg.set(update);
+    // Reapply last known dots to avoid clearing by set()
+    if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
+    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
   }
 
   setLegalDests(dests: LegalDests) {
     if (!this.cg) return;
     if (!dests || dests.length === 0) {
+      // Avoid flicker: ignore clears arriving immediately after a set
+      if (Date.now() - this.lastLegalSetTs < 200) return;
       // Clear to restore default behavior (no restriction)
       this.cg.set({ movable: { dests: undefined, showDests: true } });
+      this.lastLegalMap = null;
       return;
     }
     const map = new Map<string, string[]>(dests);
     this.cg.set({ movable: { dests: map, showDests: true } });
+    // Ensure premove dots are not shown concurrently
+    this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+    this.lastLegalMap = map;
+    this.lastLegalSetTs = Date.now();
+    this.lastPremoveMap = null;
   }
 
   setTurn(color: Color) {
@@ -90,21 +118,33 @@ export class BoardController {
   setDraggable(enabled: boolean, playerColor: Color | 'both' = 'both') {
     if (!this.cg) return;
     this.cg.set({ draggable: { enabled }, movable: { color: playerColor } });
+    // Reapply dots after state changes
+    if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
+    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
   }
 
   setFreeMode(free: boolean) {
     if (!this.cg) return;
     this.cg.set({ movable: { free } });
+    if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
+    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
   }
 
   setPremoveDests(dests: Array<[Square, Square[]]>) {
     if (!this.cg) return;
     if (!dests || dests.length === 0) {
+      if (Date.now() - this.lastPremoveSetTs < 200) return;
       this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+      this.lastPremoveMap = null;
       return;
     }
     const map = new Map<string, string[]>(dests);
     this.cg.set({ premovable: { customDests: map, showDests: true } });
+    // Ensure legal dots are not shown concurrently
+    this.cg.set({ movable: { dests: undefined, showDests: true } });
+    this.lastPremoveMap = map;
+    this.lastPremoveSetTs = Date.now();
+    this.lastLegalMap = null;
   }
 
   clearPremoves() {
