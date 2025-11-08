@@ -139,6 +139,12 @@ window.addEventListener('message', (evt: MessageEvent) => {
         if (id) ack(id, true);
         break;
       }
+      case 'setPremoveDests': {
+        console.log('[MFE] setPremoveDests', payload?.dests ? 'len=' + payload.dests.length : 'none');
+        ensureBoard().setPremoveDests(payload?.dests || []);
+        if (id) ack(id, true);
+        break;
+      }
       case 'setTurn': {
         console.log('[MFE] setTurn', payload?.color);
         ensureBoard().setTurn(payload?.color);

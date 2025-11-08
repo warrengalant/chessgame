@@ -92,6 +92,12 @@ export class BoardController {
     this.cg.set({ movable: { free } });
   }
 
+  setPremoveDests(dests: Array<[Square, Square[]]>) {
+    if (!this.cg) return;
+    const map = new Map<string, string[]>(dests);
+    this.cg.set({ premovable: { customDests: map, showDests: true } });
+  }
+
   clearPremoves() {
     if (!this.cg) return;
     this.cg.set({ premovable: { enabled: false } });
