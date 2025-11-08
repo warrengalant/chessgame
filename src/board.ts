@@ -87,6 +87,11 @@ export class BoardController {
     this.cg.set({ draggable: { enabled }, movable: { color: playerColor } });
   }
 
+  setFreeMode(free: boolean) {
+    if (!this.cg) return;
+    this.cg.set({ movable: { free } });
+  }
+
   clearPremoves() {
     if (!this.cg) return;
     this.cg.set({ premovable: { enabled: false } });

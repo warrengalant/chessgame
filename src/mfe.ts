@@ -102,6 +102,11 @@ window.addEventListener('message', (evt: MessageEvent) => {
         if (id) ack(id, true);
         break;
       }
+      case 'setFreeMode': {
+        ensureBoard().setFreeMode(!!payload?.free);
+        if (id) ack(id, true);
+        break;
+      }
       case 'clearPremoves': {
         ensureBoard().clearPremoves();
         if (id) ack(id, true);
