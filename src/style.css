@@ -29,18 +29,19 @@ body {
   line-height: 1;
 }
 
-/* Prefer square board sizing when host doesn't force dimensions */
+/* CRITICAL: Force perfect 1:1 square in all modes using vmin */
 #board-root {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1;
-}
-
-/* Standalone: perfect square that fits the viewport (no right/bottom stripe) */
-body.standalone #board-root {
   width: 100vmin;
   height: 100vmin;
-  aspect-ratio: 1 / 1;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+/* Ensure cg-wrap inherits perfect square sizing */
+.cg-wrap {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
 }
 
 /* Ensure raster images scale nicely */
