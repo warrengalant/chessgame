@@ -91,7 +91,7 @@ function applyTheme(name?: string) {
     boardThemeStyleEl = null;
   }
   if (pair) {
-    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: overlay, normal !important;\n  border: none !important;\n  outline: none !important;\n  box-shadow: none !important;\n}`;
+    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
     const style = document.createElement('style');
     style.id = 'board-theme-css';
     style.textContent = css;
@@ -105,7 +105,7 @@ function applyTheme(name?: string) {
       const styleEl = boardThemeStyleEl;
       if (!board || !styleEl) return;
       // Use 25% for perfect alignment with 8x8 grid (2x2 tile pattern)
-      styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: overlay, normal !important;\n  border: none !important;\n  outline: none !important;\n  box-shadow: none !important;\n}`;
+      styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
     };
     try {
       updateTile();
