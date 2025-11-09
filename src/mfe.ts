@@ -180,24 +180,12 @@ function ensureBoard() {
   
   root.appendChild(mount);
 
-  // Keep mount perfectly square and pixel-quantized to multiples of 8
-  const updateSquareSize = () => {
-    try {
-      const vw = Math.max(0, window.innerWidth);
-      const vh = Math.max(0, window.innerHeight);
-      // Use FULL dimension - NO MARGIN! Fill 100% of iframe
-      const base = Math.min(vw, vh);
-      const square = Math.max(1, Math.floor(base / 8));
-      const size = square * 8; // nearest multiple of 8 pixels
-      
-      mount.style.width = size + 'px';
-      mount.style.height = size + 'px';
-    } catch (e) {
-      console.error('❌ [MFE SIZING ERROR]', e);
-    }
-  };
-  updateSquareSize();
-  window.addEventListener('resize', updateSquareSize, { passive: true });
+  // Keep mount perfectly square - use CSS instead of fixed pixels for proper centering
+  mount.style.width = '100%';
+  mount.style.height = '100%';
+  mount.style.maxWidth = '100vh'; // Square: max width = viewport height
+  mount.style.maxHeight = '100vw'; // Square: max height = viewport width
+  mount.style.aspectRatio = '1 / 1'; // Force perfect square
 
   controller = new BoardController(mount, {
     onReady: () => post('ready', {}),
