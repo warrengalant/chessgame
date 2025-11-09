@@ -29,19 +29,18 @@ body {
   line-height: 1;
 }
 
-/* CRITICAL: Force perfect 1:1 square in all modes using vmin */
+/* Board root sized by JS to perfect square */
 #board-root {
-  width: 100vmin;
-  height: 100vmin;
-  max-width: 100vw;
-  max-height: 100vh;
+  position: relative;
+  display: block;
 }
 
-/* Ensure cg-wrap inherits perfect square sizing */
+/* cg-wrap must match parent exactly */
 .cg-wrap {
   width: 100% !important;
   height: 100% !important;
-  aspect-ratio: 1 / 1 !important;
+  position: relative !important;
+  display: block !important;
 }
 
 /* Ensure raster images scale nicely */

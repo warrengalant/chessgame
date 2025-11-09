@@ -163,11 +163,8 @@ function ensureBoard() {
   const mount = document.createElement('div');
   mount.id = 'board-root';
   mount.setAttribute('data-chessground', '');
-  mount.style.width = '100vmin';
-  mount.style.height = '100vmin';
-  mount.style.maxWidth = '100vw';
-  mount.style.maxHeight = '100vh';
   mount.style.overflow = 'hidden';
+  mount.style.position = 'relative';
   // mobile friendly sizing
   (root as HTMLElement).style.width = '100%';
   (root as HTMLElement).style.height = '100%';
@@ -184,7 +181,8 @@ function ensureBoard() {
     try {
       const vw = Math.max(0, window.innerWidth);
       const vh = Math.max(0, window.innerHeight);
-      const base = Math.min(vw, vh);
+      // Use smaller dimension minus small margin to prevent overflow
+      const base = Math.min(vw, vh) - 4;
       const square = Math.max(1, Math.floor(base / 8));
       const size = square * 8; // nearest multiple of 8 pixels
       mount.style.width = size + 'px';
