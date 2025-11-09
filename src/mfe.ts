@@ -98,16 +98,14 @@ function applyTheme(name?: string) {
     document.head.appendChild(style);
     boardThemeStyleEl = style;
 
-    // Quantize tiles to pixel multiples to avoid right/bottom seams
+    // Use percentage-based sizing to perfectly align with squares
+    // Each square is 12.5% (100% / 8), so 2x2 tile is 25%
     const updateTile = () => {
       const board = document.querySelector('cg-board') as HTMLElement | null;
       const styleEl = boardThemeStyleEl;
       if (!board || !styleEl) return;
-      const w = Math.max(0, Math.floor(board.clientWidth));
-      if (!w) return;
-      const square = Math.max(1, Math.floor(w / 8));
-      const tile = square * 2; // 2x2 tile for checker
-      styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, ${tile}px ${tile}px !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
+      // Use 25% for perfect alignment with 8x8 grid (2x2 tile pattern)
+      styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
     };
     try {
       updateTile();
@@ -160,11 +158,25 @@ function ensureBoard() {
   if (controller) return controller;
   const root = document.getElementById('app');
   if (!root) throw new Error('root #app missing');
+  
+  console.log('🎯 [MFE INIT] Starting board setup');
+  console.log('📐 [MFE INIT] Root element:', {
+    'root.clientWidth': root.clientWidth,
+    'root.clientHeight': root.clientHeight,
+    'root.offsetWidth': root.offsetWidth,
+    'root.offsetHeight': root.offsetHeight,
+    'computed width': getComputedStyle(root).width,
+    'computed height': getComputedStyle(root).height
+  });
+  
   const mount = document.createElement('div');
   mount.id = 'board-root';
   mount.setAttribute('data-chessground', '');
   mount.style.overflow = 'visible';
   mount.style.position = 'relative';
+  
+  console.log('🔧 [MFE INIT] Mount element created with overflow=visible, position=relative');
+  
   // mobile friendly sizing
   (root as HTMLElement).style.width = '100%';
   (root as HTMLElement).style.height = '100%';
@@ -174,7 +186,12 @@ function ensureBoard() {
   (root as HTMLElement).style.display = 'flex';
   (root as HTMLElement).style.alignItems = 'center';
   (root as HTMLElement).style.justifyContent = 'center';
+  
+  console.log('🎨 [MFE INIT] Root styles applied: flex centering, 100% width/height');
+  
   root.appendChild(mount);
+  
+  console.log('✅ [MFE INIT] Mount appended to root');
 
   // Keep mount perfectly square and pixel-quantized to multiples of 8
   const updateSquareSize = () => {
@@ -185,15 +202,100 @@ function ensureBoard() {
       const base = Math.min(vw, vh) - 4;
       const square = Math.max(1, Math.floor(base / 8));
       const size = square * 8; // nearest multiple of 8 pixels
+      
+      console.log('🔷 [MFE SIZING DEBUG]', {
+        viewportWidth: vw,
+        viewportHeight: vh,
+        base: base,
+        squareSize: square,
+        finalSize: size,
+        'size is square?': size === size,
+        'mount.style.width BEFORE': mount.style.width,
+        'mount.style.height BEFORE': mount.style.height
+      });
+      
       mount.style.width = size + 'px';
       mount.style.height = size + 'px';
-    } catch {}
+      
+      console.log('✅ [MFE SIZING APPLIED]', {
+        'mount.style.width AFTER': mount.style.width,
+        'mount.style.height AFTER': mount.style.height,
+        'mount.clientWidth': mount.clientWidth,
+        'mount.clientHeight': mount.clientHeight,
+        'mount.offsetWidth': mount.offsetWidth,
+        'mount.offsetHeight': mount.offsetHeight,
+        'computed width': getComputedStyle(mount).width,
+        'computed height': getComputedStyle(mount).height
+      });
+    } catch (e) {
+      console.error('❌ [MFE SIZING ERROR]', e);
+    }
   };
   updateSquareSize();
   window.addEventListener('resize', updateSquareSize, { passive: true });
 
   controller = new BoardController(mount, {
-    onReady: () => post('ready', {}),
+    onReady: () => {
+      post('ready', {});
+      // Debug after board is fully initialized
+      setTimeout(() => {
+        console.log('🔍 [MFE POST-INIT DEBUG]');
+        console.log('📏 Root (#app):', {
+          width: root.clientWidth,
+          height: root.clientHeight,
+          computedWidth: getComputedStyle(root).width,
+          computedHeight: getComputedStyle(root).height,
+          display: getComputedStyle(root).display,
+          flexDirection: getComputedStyle(root).flexDirection
+        });
+        console.log('📦 Mount (#board-root):', {
+          width: mount.clientWidth,
+          height: mount.clientHeight,
+          styleWidth: mount.style.width,
+          styleHeight: mount.style.height,
+          computedWidth: getComputedStyle(mount).width,
+          computedHeight: getComputedStyle(mount).height,
+          position: getComputedStyle(mount).position,
+          overflow: getComputedStyle(mount).overflow
+        });
+        const cgWrap = mount.querySelector('.cg-wrap');
+        if (cgWrap) {
+          console.log('♟️ Chessground (.cg-wrap):', {
+            width: (cgWrap as HTMLElement).clientWidth,
+            height: (cgWrap as HTMLElement).clientHeight,
+            computedWidth: getComputedStyle(cgWrap).width,
+            computedHeight: getComputedStyle(cgWrap).height
+          });
+        }
+        const cgBoard = mount.querySelector('cg-board');
+        if (cgBoard) {
+          const boardStyle = getComputedStyle(cgBoard);
+          console.log('🎨 Board (cg-board):', {
+            width: (cgBoard as HTMLElement).clientWidth,
+            height: (cgBoard as HTMLElement).clientHeight,
+            computedWidth: boardStyle.width,
+            computedHeight: boardStyle.height,
+            backgroundSize: boardStyle.backgroundSize,
+            backgroundPosition: boardStyle.backgroundPosition,
+            backgroundRepeat: boardStyle.backgroundRepeat,
+            boxSizing: boardStyle.boxSizing
+          });
+        }
+        // Check individual squares
+        const squares = mount.querySelectorAll('cg-board square');
+        if (squares.length > 0) {
+          const firstSquare = squares[0] as HTMLElement;
+          const squareStyle = getComputedStyle(firstSquare);
+          console.log('🔲 First square:', {
+            width: firstSquare.clientWidth,
+            height: firstSquare.clientHeight,
+            computedWidth: squareStyle.width,
+            computedHeight: squareStyle.height,
+            totalSquares: squares.length
+          });
+        }
+      }, 100);
+    },
     onMove: (m) => post('move', m),
     onSelect: (sq) => post('select', { square: sq }),
     onError: (m) => error(m),
@@ -222,13 +324,7 @@ window.addEventListener('message', (evt: MessageEvent) => {
         allowedOrigin = evt.origin || '*';
         const opts = (payload?.options || {}) as InitOptions;
         const board = ensureBoard();
-        board.init({
-          orientation: opts.orientation || 'white',
-          coordinates: opts.coordinates !== false,
-          animationMs: typeof opts.animationMs === 'number' ? opts.animationMs : 200,
-          blockTouchScroll: opts.blockTouchScroll !== false,
-          playerColor: opts.playerColor || 'both',
-        });
+        board.init(opts);
         if (id) ack(id, true);
         initializedByParent = true;
         // If parent provided theme on init
@@ -296,6 +392,8 @@ window.addEventListener('message', (evt: MessageEvent) => {
       case 'setSize': {
         const w = Number(payload?.width) || 0;
         const h = Number(payload?.height) || 0;
+        console.log('⚠️ [MFE] setSize message received!', { width: w, height: h, from: 'parent' });
+        console.log('🚨 [MFE] This message should NOT be sent! Board should size itself.');
         ensureBoard().setSize(w, h);
         if (id) ack(id, true);
         break;

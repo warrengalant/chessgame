@@ -37,10 +37,11 @@ body {
 
 /* cg-wrap must match parent exactly */
 .cg-wrap {
-  width: 100% !important;
-  height: 100% !important;
+  width: 100%;
+  height: 100%;
   position: relative !important;
   display: block !important;
+  /* Removed !important from width/height so #board-root square sizing works */
 }
 
 /* Ensure raster images scale nicely */
