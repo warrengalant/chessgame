@@ -165,15 +165,15 @@ function ensureBoard() {
   mount.style.overflow = 'visible';
   mount.style.position = 'relative';
   
-  // mobile friendly sizing
+  // mobile friendly sizing - FILL 100%, NO CENTERING!
   (root as HTMLElement).style.width = '100%';
   (root as HTMLElement).style.height = '100%';
   (root as HTMLElement).style.overflow = 'hidden';
   (root as HTMLElement).style.touchAction = 'none';
-  // Center the square within available space
-  (root as HTMLElement).style.display = 'flex';
-  (root as HTMLElement).style.alignItems = 'center';
-  (root as HTMLElement).style.justifyContent = 'center';
+  (root as HTMLElement).style.margin = '0';
+  (root as HTMLElement).style.padding = '0';
+  // NO flex centering - just fill the space!
+  (root as HTMLElement).style.display = 'block';
   
   root.appendChild(mount);
 
