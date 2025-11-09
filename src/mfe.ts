@@ -17,6 +17,7 @@ let controller: BoardController | null = null;
 let initializedByParent = false;
 let customStyleEl: HTMLStyleElement | null = null;
 let boardThemeStyleEl: HTMLStyleElement | null = null;
+let boardTileObserver: ResizeObserver | null = null;
 
 function applyTheme(name?: string) {
   const body = document.body;
@@ -90,12 +91,32 @@ function applyTheme(name?: string) {
     boardThemeStyleEl = null;
   }
   if (pair) {
-    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: overlay, normal !important;\n  border: 1px solid ${pair.border || 'transparent'} !important;\n}`;
+    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
     const style = document.createElement('style');
     style.id = 'board-theme-css';
     style.textContent = css;
     document.head.appendChild(style);
     boardThemeStyleEl = style;
+
+    // Quantize tiles to pixel multiples to avoid right/bottom seams
+    const updateTile = () => {
+      const board = document.querySelector('cg-board') as HTMLElement | null;
+      const styleEl = boardThemeStyleEl;
+      if (!board || !styleEl) return;
+      const w = Math.max(0, Math.floor(board.clientWidth));
+      if (!w) return;
+      const square = Math.max(1, Math.floor(w / 8));
+      const tile = square * 2; // 2x2 tile for checker
+      styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: auto, ${tile}px ${tile}px !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
+    };
+    try {
+      updateTile();
+      if (boardTileObserver) { try { boardTileObserver.disconnect(); } catch {} }
+      boardTileObserver = new ResizeObserver(() => updateTile());
+      const target = document.querySelector('cg-board') as HTMLElement | null;
+      if (target) boardTileObserver.observe(target);
+      window.addEventListener('resize', updateTile, { passive: true });
+    } catch {}
   }
 }
 
