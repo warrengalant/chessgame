@@ -294,6 +294,9 @@ window.addEventListener('load', () => {
     const usp = new URLSearchParams(window.location.search);
     const theme = usp.get('theme');
     if (theme) applyTheme(theme);
+    const board = usp.get('board');
+    if (board) applyTheme(board);
+    if (!theme && !board) applyTheme('slate');
   } catch {}
   // Send "hello" without strict origin; parent should reply with init
   post('hello', { version: VERSION });
