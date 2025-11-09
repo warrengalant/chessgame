@@ -164,33 +164,37 @@ function ensureBoard() {
   mount.setAttribute('data-chessground', '');
   mount.style.overflow = 'visible';
   mount.style.position = 'relative';
-  mount.style.flexShrink = '0'; // Don't shrink in flex container
-  mount.style.margin = 'auto'; // Center within flex container
   
   // mobile friendly sizing
   (root as HTMLElement).style.width = '100%';
   (root as HTMLElement).style.height = '100%';
   (root as HTMLElement).style.overflow = 'hidden';
   (root as HTMLElement).style.touchAction = 'none';
-  // Center the square within available space - CRITICAL FOR EQUAL GAPS!
+  // Center the square within available space
   (root as HTMLElement).style.display = 'flex';
   (root as HTMLElement).style.alignItems = 'center';
   (root as HTMLElement).style.justifyContent = 'center';
-  (root as HTMLElement).style.position = 'relative';
   
   root.appendChild(mount);
 
-  // Keep mount perfectly square - FILL CONTAINER COMPLETELY!
-  // Calculate size based on actual parent dimensions (not viewport!)
-  const updateSize = () => {
-    const parentWidth = root.clientWidth;
-    const parentHeight = root.clientHeight;
-    const size = Math.min(parentWidth, parentHeight);
-    mount.style.width = size + 'px';
-    mount.style.height = size + 'px';
+  // Keep mount perfectly square and pixel-quantized to multiples of 8
+  const updateSquareSize = () => {
+    try {
+      const vw = Math.max(0, window.innerWidth);
+      const vh = Math.max(0, window.innerHeight);
+      // Use FULL dimension - NO MARGIN! Fill 100% of iframe
+      const base = Math.min(vw, vh);
+      const square = Math.max(1, Math.floor(base / 8));
+      const size = square * 8; // nearest multiple of 8 pixels
+      
+      mount.style.width = size + 'px';
+      mount.style.height = size + 'px';
+    } catch (e) {
+      console.error('❌ [MFE SIZING ERROR]', e);
+    }
   };
-  updateSize();
-  window.addEventListener('resize', updateSize, { passive: true });
+  updateSquareSize();
+  window.addEventListener('resize', updateSquareSize, { passive: true });
 
   controller = new BoardController(mount, {
     onReady: () => post('ready', {}),

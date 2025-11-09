@@ -7,17 +7,6 @@ html, body, #app {
   background: #1a1d29 !important; /* Dark background - NO WHITE FRAMES! */
 }
 
-/* ⚡ CRITICAL: CENTER THE BOARD PERFECTLY */
-#app {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-#board-root {
-  margin: auto !important;
-}
-
 /* BLACK background to match the dark theme - NO WHITE GAPS! */
 html, body {
   background: #1a1d29 !important; /* Dark background matching the site theme */
@@ -49,13 +38,11 @@ body {
 
 /* cg-wrap must match parent exactly */
 .cg-wrap {
-  width: 100% !important;
-  height: 100% !important;
+  width: 100%;
+  height: 100%;
   position: relative !important;
   display: block !important;
-  box-sizing: border-box !important; /* FIX: Override Chessground's content-box to prevent overflow! */
-  margin: 0 !important;
-  padding: 0 !important;
+  /* Removed !important from width/height so #board-root square sizing works */
 }
 
 /* Ensure raster images scale nicely */
