@@ -7,6 +7,17 @@ html, body, #app {
   background: #1a1d29 !important; /* Dark background - NO WHITE FRAMES! */
 }
 
+/* ⚡ CRITICAL: CENTER THE BOARD PERFECTLY */
+#app {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#board-root {
+  margin: auto !important;
+}
+
 /* BLACK background to match the dark theme - NO WHITE GAPS! */
 html, body {
   background: #1a1d29 !important; /* Dark background matching the site theme */
