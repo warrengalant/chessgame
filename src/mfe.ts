@@ -164,16 +164,19 @@ function ensureBoard() {
   mount.setAttribute('data-chessground', '');
   mount.style.overflow = 'visible';
   mount.style.position = 'relative';
+  mount.style.flexShrink = '0'; // Don't shrink in flex container
+  mount.style.margin = 'auto'; // Center within flex container
   
   // mobile friendly sizing
   (root as HTMLElement).style.width = '100%';
   (root as HTMLElement).style.height = '100%';
   (root as HTMLElement).style.overflow = 'hidden';
   (root as HTMLElement).style.touchAction = 'none';
-  // Center the square within available space
+  // Center the square within available space - CRITICAL FOR EQUAL GAPS!
   (root as HTMLElement).style.display = 'flex';
   (root as HTMLElement).style.alignItems = 'center';
   (root as HTMLElement).style.justifyContent = 'center';
+  (root as HTMLElement).style.position = 'relative';
   
   root.appendChild(mount);
 
