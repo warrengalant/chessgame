@@ -180,11 +180,11 @@ function ensureBoard() {
   
   root.appendChild(mount);
 
-  // Keep mount perfectly square - use CSS instead of fixed pixels for proper centering
-  mount.style.width = '100%';
-  mount.style.height = '100%';
-  mount.style.maxWidth = '100vh'; // Square: max width = viewport height
-  mount.style.maxHeight = '100vw'; // Square: max height = viewport width
+  // Keep mount perfectly square - FILL CONTAINER COMPLETELY!
+  // Use min() to take smaller dimension, ensuring it fills the space
+  const size = 'min(100vw, 100vh)';
+  mount.style.width = size;
+  mount.style.height = size;
   mount.style.aspectRatio = '1 / 1'; // Force perfect square
 
   controller = new BoardController(mount, {
