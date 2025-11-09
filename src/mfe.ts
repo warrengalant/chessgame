@@ -91,7 +91,7 @@ function applyTheme(name?: string) {
     boardThemeStyleEl = null;
   }
   if (pair) {
-    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
+    const css = `cg-board {\n  display:block !important;\n  width:100% !important;\n  height:100% !important;\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
     const style = document.createElement('style');
     style.id = 'board-theme-css';
     style.textContent = css;
@@ -107,7 +107,7 @@ function applyTheme(name?: string) {
       if (!w) return;
       const square = Math.max(1, Math.floor(w / 8));
       const tile = square * 2; // 2x2 tile for checker
-      styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: auto, ${tile}px ${tile}px !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
+      styleEl.textContent = `cg-board {\n  display:block !important;\n  width:100% !important;\n  height:100% !important;\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, ${tile}px ${tile}px !important;\n  background-blend-mode: overlay, normal !important;\n  outline: 1px solid ${pair.border || 'transparent'} !important;\n}`;
     };
     try {
       updateTile();
