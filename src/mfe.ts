@@ -24,14 +24,64 @@ function applyTheme(name?: string) {
   body.classList.remove('theme-pc30');
   if (name === 'pc30') body.classList.add('theme-pc30');
 
-  // Map site theme names to light/dark colors
-  const themeMap: Record<string, { light: string; dark: string }> = {
-    brown: { light: '#f0d9b5', dark: '#b58863' },
-    blue: { light: '#dce8f5', dark: '#6c8fb3' },
-    purple: { light: '#e6dbff', dark: '#6f58a8' },
-    green: { light: '#e3f0e3', dark: '#7aa774' },
-    'wood-light': { light: '#f3e7cd', dark: '#c9a46b' },
-    'wood-dark': { light: '#e6d1a3', dark: '#8b6a3e' },
+  // Map site theme names to light/dark/border/pattern
+  const themeMap: Record<string, { light: string; dark: string; border?: string; pattern?: string }> = {
+    blue: {
+      name: 'Blue',
+      light: '#CCE5FF',
+      dark: '#336699',
+      border: '#224466',
+      pattern: `repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0px, rgba(0,0,0,0.04) 20px)`,
+    } as any,
+    emerald: {
+      name: 'Emerald',
+      light: '#D9EAD3',
+      dark: '#38761D',
+      border: '#1A330F',
+      pattern: `repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0px, rgba(0,50,0,0.05) 25px)`,
+    } as any,
+    slate: {
+      name: 'Slate',
+      light: '#CBD5E1',
+      dark: '#475569',
+      border: '#1E293B',
+      pattern: `repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(0,0,0,0.05) 25px)`,
+    } as any,
+    purple: {
+      name: 'Purple',
+      light: '#EEE6FF',
+      dark: '#5E3A8A',
+      border: '#3A1E54',
+      pattern: `repeating-linear-gradient(120deg, rgba(255,255,255,0.05) 0px, rgba(0,0,0,0.05) 25px)`,
+    } as any,
+    cherry: {
+      name: 'Cherry Wood',
+      light: '#D29A7C',
+      dark: '#7C3F26',
+      border: '#52281A',
+      pattern: `repeating-linear-gradient(135deg, rgba(190,70,40,0.15) 0px, rgba(120,30,10,0.1) 15px, rgba(190,70,40,0.15) 30px)`,
+    } as any,
+    mahogany: {
+      name: 'Mahogany Wood',
+      light: '#B87A5B',
+      dark: '#4B1E0F',
+      border: '#2C120A',
+      pattern: `repeating-linear-gradient(120deg, rgba(110,40,30,0.2) 0px, rgba(60,20,15,0.15) 15px, rgba(110,40,30,0.2) 30px)`,
+    } as any,
+    maple: {
+      name: 'Maple Wood',
+      light: '#F5E1C8',
+      dark: '#C59A72',
+      border: '#8B6C4B',
+      pattern: `repeating-linear-gradient(90deg, rgba(255,230,190,0.25) 0px, rgba(200,160,120,0.15) 15px, rgba(255,230,190,0.25) 30px)`,
+    } as any,
+    grey: {
+      name: 'Grey',
+      light: '#DADADA',
+      dark: '#707070',
+      border: '#333333',
+      pattern: `repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0px, rgba(0,0,0,0.05) 20px)`,
+    } as any,
   };
 
   // Inject CSS for cg-board background if known theme
@@ -41,7 +91,7 @@ function applyTheme(name?: string) {
     boardThemeStyleEl = null;
   }
   if (pair) {
-    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: 25% 25% !important;\n}`;
+    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: overlay, normal !important;\n  border: 1px solid ${pair.border || 'transparent'} !important;\n}`;
     const style = document.createElement('style');
     style.id = 'board-theme-css';
     style.textContent = css;
