@@ -20,7 +20,7 @@ let boardThemeStyleEl: HTMLStyleElement | null = null;
 
 function applyTheme(name?: string) {
   const body = document.body;
-  body.classList.remove('theme-pc30');
+  // Keep pc30 piece theme sticky unless explicitly disabled in the future
   if (name === 'pc30') body.classList.add('theme-pc30');
 
   // Map site theme names to light/dark/border/pattern
