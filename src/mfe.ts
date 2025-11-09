@@ -181,11 +181,16 @@ function ensureBoard() {
   root.appendChild(mount);
 
   // Keep mount perfectly square - FILL CONTAINER COMPLETELY!
-  // Use min() to take smaller dimension, ensuring it fills the space
-  const size = 'min(100vw, 100vh)';
-  mount.style.width = size;
-  mount.style.height = size;
-  mount.style.aspectRatio = '1 / 1'; // Force perfect square
+  // Calculate size based on actual parent dimensions (not viewport!)
+  const updateSize = () => {
+    const parentWidth = root.clientWidth;
+    const parentHeight = root.clientHeight;
+    const size = Math.min(parentWidth, parentHeight);
+    mount.style.width = size + 'px';
+    mount.style.height = size + 'px';
+  };
+  updateSize();
+  window.addEventListener('resize', updateSize, { passive: true });
 
   controller = new BoardController(mount, {
     onReady: () => post('ready', {}),
