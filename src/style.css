@@ -59,3 +59,14 @@ body.theme-pc30 .cg-wrap piece.bishop.white {
 body.theme-pc30 .cg-wrap piece.bishop.black {
   background-image: url('/pieces/pc30/black/dragon_bishop.png') !important;
 }
+
+/* ⚡ FIX COORDINATES: Keep them INSIDE the board, not outside! */
+.cg-wrap coords.ranks {
+  left: 2px !important;
+  top: 0 !important;
+}
+
+.cg-wrap coords.files {
+  bottom: 0 !important;
+  left: 12.5% !important;
+}

@@ -182,8 +182,8 @@ function ensureBoard() {
     try {
       const vw = Math.max(0, window.innerWidth);
       const vh = Math.max(0, window.innerHeight);
-      // Use smaller dimension minus small margin to prevent overflow
-      const base = Math.min(vw, vh) - 4;
+      // Use FULL dimension - NO MARGIN! Fill 100% of iframe
+      const base = Math.min(vw, vh);
       const square = Math.max(1, Math.floor(base / 8));
       const size = square * 8; // nearest multiple of 8 pixels
       
