@@ -17,11 +17,37 @@ let parentWindow: Window | null = null;
 let controller: BoardController | null = null;
 let initializedByParent = false;
 let customStyleEl: HTMLStyleElement | null = null;
+let boardThemeStyleEl: HTMLStyleElement | null = null;
 
 function applyTheme(name?: string) {
   const body = document.body;
   body.classList.remove('theme-pc30');
   if (name === 'pc30') body.classList.add('theme-pc30');
+
+  // Map site theme names to light/dark colors
+  const themeMap: Record<string, { light: string; dark: string }> = {
+    brown: { light: '#f0d9b5', dark: '#b58863' },
+    blue: { light: '#dce8f5', dark: '#6c8fb3' },
+    purple: { light: '#e6dbff', dark: '#6f58a8' },
+    green: { light: '#e3f0e3', dark: '#7aa774' },
+    'wood-light': { light: '#f3e7cd', dark: '#c9a46b' },
+    'wood-dark': { light: '#e6d1a3', dark: '#8b6a3e' },
+  };
+
+  // Inject CSS for cg-board background if known theme
+  const pair = name ? themeMap[name] : undefined;
+  if (boardThemeStyleEl) {
+    try { boardThemeStyleEl.remove(); } catch {}
+    boardThemeStyleEl = null;
+  }
+  if (pair) {
+    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: conic-gradient(${pair.light} 90deg, ${pair.dark} 0 180deg, ${pair.light} 0 270deg, ${pair.dark} 0) !important;\n  background-size: 25% 25% !important;\n}`;
+    const style = document.createElement('style');
+    style.id = 'board-theme-css';
+    style.textContent = css;
+    document.head.appendChild(style);
+    boardThemeStyleEl = style;
+  }
 }
 
 function applyCustomPieceImages(map?: Record<string, string>) {
