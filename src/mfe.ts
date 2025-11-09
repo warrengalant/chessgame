@@ -163,7 +163,7 @@ function ensureBoard() {
   const mount = document.createElement('div');
   mount.id = 'board-root';
   mount.setAttribute('data-chessground', '');
-  mount.style.overflow = 'hidden';
+  mount.style.overflow = 'visible';
   mount.style.position = 'relative';
   // mobile friendly sizing
   (root as HTMLElement).style.width = '100%';
