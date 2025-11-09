@@ -47,13 +47,12 @@ body {
   display: block;
 }
 
-/* cg-wrap must match parent exactly */
+/* cg-wrap must match parent exactly - OVERRIDE chessground's default 320px! */
 .cg-wrap {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   position: relative !important;
   display: block !important;
-  /* Removed !important from width/height so #board-root square sizing works */
 }
 
 /* Ensure raster images scale nicely */
