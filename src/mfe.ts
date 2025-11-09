@@ -163,15 +163,36 @@ function ensureBoard() {
   const mount = document.createElement('div');
   mount.id = 'board-root';
   mount.setAttribute('data-chessground', '');
-  mount.style.width = '100%';
-  mount.style.height = '100%';
+  mount.style.width = '100vmin';
+  mount.style.height = '100vmin';
+  mount.style.maxWidth = '100vw';
+  mount.style.maxHeight = '100vh';
   mount.style.overflow = 'hidden';
   // mobile friendly sizing
   (root as HTMLElement).style.width = '100%';
   (root as HTMLElement).style.height = '100%';
   (root as HTMLElement).style.overflow = 'hidden';
   (root as HTMLElement).style.touchAction = 'none';
+  // Center the square within available space
+  (root as HTMLElement).style.display = 'flex';
+  (root as HTMLElement).style.alignItems = 'center';
+  (root as HTMLElement).style.justifyContent = 'center';
   root.appendChild(mount);
+
+  // Keep mount perfectly square and pixel-quantized to multiples of 8
+  const updateSquareSize = () => {
+    try {
+      const vw = Math.max(0, window.innerWidth);
+      const vh = Math.max(0, window.innerHeight);
+      const base = Math.min(vw, vh);
+      const square = Math.max(1, Math.floor(base / 8));
+      const size = square * 8; // nearest multiple of 8 pixels
+      mount.style.width = size + 'px';
+      mount.style.height = size + 'px';
+    } catch {}
+  };
+  updateSquareSize();
+  window.addEventListener('resize', updateSquareSize, { passive: true });
 
   controller = new BoardController(mount, {
     onReady: () => post('ready', {}),
