@@ -11,6 +11,16 @@ html, body {
   background: transparent !important;
 }
 
+/* Standalone mode (opened directly, not embedded): avoid white frame by matching board tone */
+html.standalone, body.standalone {
+  background: #b58863 !important; /* chessground brown dark square */
+}
+body.standalone #app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Avoid any default fonts or centering that could affect layout */
 body {
   display: block;

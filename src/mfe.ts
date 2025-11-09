@@ -206,6 +206,13 @@ window.addEventListener('message', (evt: MessageEvent) => {
 // Notify parent that the iframe booted and is ready to be init()
 window.addEventListener('load', () => {
   console.log('[MFE] window load, sending hello');
+  try {
+    const isEmbedded = window.self !== window.top;
+    document.documentElement.classList.toggle('embedded', isEmbedded);
+    document.documentElement.classList.toggle('standalone', !isEmbedded);
+    document.body.classList.toggle('embedded', isEmbedded);
+    document.body.classList.toggle('standalone', !isEmbedded);
+  } catch {}
   // Theme via query param
   try {
     const usp = new URLSearchParams(window.location.search);
