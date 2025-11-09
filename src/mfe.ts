@@ -1,5 +1,4 @@
 import 'chessground/assets/chessground.base.css';
-import 'chessground/assets/chessground.brown.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
 import { BoardController, type InitOptions } from './board';
@@ -296,7 +295,7 @@ window.addEventListener('load', () => {
     if (theme) applyTheme(theme);
     const board = usp.get('board');
     if (board) applyTheme(board);
-    if (!theme && !board) applyTheme('slate');
+    if (!theme && !board) applyTheme('blue');
   } catch {}
   // Send "hello" without strict origin; parent should reply with init
   post('hello', { version: VERSION });
