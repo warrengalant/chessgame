@@ -165,27 +165,27 @@ function ensureBoard() {
   mount.style.overflow = 'visible';
   mount.style.position = 'relative';
   
-  // mobile friendly sizing - FILL 100%, NO CENTERING!
+  // mobile friendly sizing - CENTER AND FILL!
   (root as HTMLElement).style.width = '100%';
   (root as HTMLElement).style.height = '100%';
   (root as HTMLElement).style.overflow = 'hidden';
   (root as HTMLElement).style.touchAction = 'none';
   (root as HTMLElement).style.margin = '0';
   (root as HTMLElement).style.padding = '0';
-  // NO flex centering - just fill the space!
-  (root as HTMLElement).style.display = 'block';
+  // CENTER the board!
+  (root as HTMLElement).style.display = 'flex';
+  (root as HTMLElement).style.alignItems = 'center';
+  (root as HTMLElement).style.justifyContent = 'center';
   
   root.appendChild(mount);
 
-  // Keep mount perfectly square and pixel-quantized to multiples of 8
+  // Make board fill 100% of container - NO ROUNDING!
   const updateSquareSize = () => {
     try {
       const vw = Math.max(0, window.innerWidth);
       const vh = Math.max(0, window.innerHeight);
-      // Use FULL dimension - NO MARGIN! Fill 100% of iframe
-      const base = Math.min(vw, vh);
-      const square = Math.max(1, Math.floor(base / 8));
-      const size = square * 8; // nearest multiple of 8 pixels
+      // Use FULL dimension - fill 100%!
+      const size = Math.min(vw, vh);
       
       mount.style.width = size + 'px';
       mount.style.height = size + 'px';
