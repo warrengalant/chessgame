@@ -19,6 +19,8 @@ body.standalone #app {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100vw;
+  height: 100vh;
 }
 
 /* Avoid any default fonts or centering that could affect layout */
@@ -31,6 +33,13 @@ body {
 #board-root {
   width: 100%;
   height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+/* Standalone: perfect square that fits the viewport (no right/bottom stripe) */
+body.standalone #board-root {
+  width: 100vmin;
+  height: 100vmin;
   aspect-ratio: 1 / 1;
 }
 
