@@ -47,12 +47,15 @@ body {
   display: block;
 }
 
-/* cg-wrap must match parent exactly - OVERRIDE chessground's default 320px! */
+/* cg-wrap must match parent exactly */
 .cg-wrap {
   width: 100% !important;
   height: 100% !important;
   position: relative !important;
   display: block !important;
+  box-sizing: border-box !important; /* FIX: Override Chessground's content-box to prevent overflow! */
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Ensure raster images scale nicely */
