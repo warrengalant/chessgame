@@ -26,7 +26,7 @@ function applyTheme(name?: string) {
   if (name === 'pc30') body.classList.add('theme-pc30');
 
   // Map site theme names to light/dark/border/pattern
-  const themeMap: Record<string, { light: string; dark: string; border?: string; pattern?: string }> = {
+  const themeMap: Record<string, { light: string; dark: string; border?: string; pattern?: string; useImage?: boolean; imageUrl?: string }> = {
     blue: {
       name: 'Blue',
       light: '#CCE5FF',
@@ -83,6 +83,14 @@ function applyTheme(name?: string) {
       border: '#333333',
       pattern: `linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.03) 100%)`,
     } as any,
+    custom: {
+      name: 'Custom Wood',
+      light: '#E8D4B8',
+      dark: '#B8804C',
+      border: '#8B5A2B',
+      useImage: true,
+      imageUrl: '/chessboard.jpg',
+    } as any,
   };
 
   // Inject CSS for cg-board background if known theme
@@ -92,7 +100,14 @@ function applyTheme(name?: string) {
     boardThemeStyleEl = null;
   }
   if (pair) {
-    const css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: normal, normal !important;\n}`;
+    let css = '';
+    if (pair.useImage && pair.imageUrl) {
+      // Custom image board - use image as background, no conic gradient
+      css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: url('${pair.imageUrl}') !important;\n  background-size: 100% 100% !important;\n  background-position: center !important;\n  background-repeat: no-repeat !important;\n}`;
+    } else {
+      // Standard theme with conic gradient
+      css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: normal, normal !important;\n}`;
+    }
     const style = document.createElement('style');
     style.id = 'board-theme-css';
     style.textContent = css;
