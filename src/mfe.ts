@@ -22,7 +22,11 @@ let boardTileObserver: ResizeObserver | null = null;
 function applyTheme(name?: string) {
   const body = document.body;
   // Keep pc30 piece theme sticky unless explicitly disabled in the future
-  if (name === 'pc30') body.classList.add('theme-pc30');
+  if (name === 'pc30') {
+    body.classList.add('theme-pc30');
+    // Do not touch board theme CSS when applying piece theme
+    return;
+  }
 
   // Map site theme names to light/dark/border/pattern
   const themeMap: Record<string, { light: string; dark: string; border?: string; pattern?: string; useImage?: boolean; imageUrl?: string }> = {
