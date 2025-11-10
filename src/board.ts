@@ -85,6 +85,8 @@ export class BoardController {
             if (key) {
               this.lastSelectTs = Date.now();
               this.callbacks.onSelect(key);
+              // Diagnostic: snapshot after selection
+              try { setTimeout(() => this.debugReport(`select:${key}`), 0); } catch {}
             } else {
               // Ignore immediate deselects right after a select to prevent flicker
               if (Date.now() - this.lastSelectTs < 200) return;
@@ -94,6 +96,8 @@ export class BoardController {
               this.cg.set({ premovable: { dests: undefined, showDests: true } });
               this.lastLegalMap = null;
               this.lastPremoveMap = null;
+              // Diagnostic: snapshot after deselect
+              try { setTimeout(() => this.debugReport('deselect'), 0); } catch {}
             }
           },
         },
