@@ -94,7 +94,8 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 /* Support both legacy <square> and modern <cg-square> elements */
 .cg-wrap cg-square,
 .cg-wrap square {
-  position: relative !important; /* allow ::after overlays */
+  position: absolute !important;
+  display: block !important;
 }
 .cg-wrap square.move-dest,
 .cg-wrap cg-square.move-dest {
