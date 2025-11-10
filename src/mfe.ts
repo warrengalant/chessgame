@@ -120,8 +120,13 @@ function applyTheme(name?: string) {
       const board = document.querySelector('cg-board') as HTMLElement | null;
       const styleEl = boardThemeStyleEl;
       if (!board || !styleEl) return;
-      // Use 25% for perfect alignment with 8x8 grid (2x2 tile pattern)
-      styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: normal, normal !important;\n}`;
+      // If using a custom image theme, keep the image and do NOT overwrite with gradient
+      if ((pair as any).useImage && (pair as any).imageUrl) {
+        styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: url('${(pair as any).imageUrl}') !important;\n  background-size: 100% 100% !important;\n  background-position: center !important;\n  background-repeat: no-repeat !important;\n}`;
+      } else {
+        // Use 25% for perfect alignment with 8x8 grid (2x2 tile pattern)
+        styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: normal, normal !important;\n}`;
+      }
     };
     try {
       updateTile();
