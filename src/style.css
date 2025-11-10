@@ -55,11 +55,11 @@ body {
 /* pc30 theme: dragon bishops (sprites in public/pieces/pc30/...) */
 body.theme-pc30 .cg-wrap piece.bishop.white,
 body.theme-pc30 .cg-wrap cg-piece.bishop.white {
-  background-image: url('pieces/pc30/white/dragon_bishop.png') !important;
+  background-image: url('/pieces/pc30/white/dragon_bishop.png') !important;
 }
 body.theme-pc30 .cg-wrap piece.bishop.black,
 body.theme-pc30 .cg-wrap cg-piece.bishop.black {
-  background-image: url('pieces/pc30/black/dragon_bishop.png') !important;
+  background-image: url('/pieces/pc30/black/dragon_bishop.png') !important;
 }
 
 /* ⚡ HIDE ALL COORDINATES */

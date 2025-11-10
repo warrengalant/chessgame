@@ -285,7 +285,10 @@ window.addEventListener('message', (evt: MessageEvent) => {
       }
       case 'setTheme': {
         applyTheme(payload?.name);
-        applyCustomPieceImages(payload?.pieceImages);
+        // Only update piece images if explicitly provided; otherwise keep existing (pc30 bishops)
+        if (payload && payload.pieceImages) {
+          applyCustomPieceImages(payload.pieceImages);
+        }
         if (id) ack(id, true);
         break;
       }
