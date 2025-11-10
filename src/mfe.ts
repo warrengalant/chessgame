@@ -355,6 +355,19 @@ window.addEventListener('load', () => {
     const board = usp.get('board');
     if (board) applyTheme(board);
     if (!theme && !board) applyTheme('blue');
+    // Boot position via query params (fallback when parent hasn't init'ed yet)
+    const fen = usp.get('fen');
+    if (fen) {
+      const turn = (usp.get('turn') as any) || 'white';
+      const ori = (usp.get('ori') as any) || 'white';
+      const coords = usp.get('coords') !== 'false';
+      try {
+        const bc = ensureBoard();
+        bc.init({ orientation: ori, coordinates: coords, animationMs: 200, blockTouchScroll: true, playerColor: 'both' } as InitOptions);
+        bc.setPosition({ fen, turnColor: turn, orientation: ori } as any);
+        initializedByParent = true; // prevent debug fallback
+      } catch (e) {}
+    }
   } catch {}
   // Send "hello" without strict origin; parent should reply with init
   post('hello', { version: VERSION });
