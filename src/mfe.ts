@@ -89,7 +89,7 @@ function applyTheme(name?: string) {
       dark: '#B8804C',
       border: '#8B5A2B',
       useImage: true,
-      imageUrl: '/chessboard.jpg',
+      imageUrl: './chessboard.jpg',
     } as any,
   };
 
