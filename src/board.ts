@@ -58,13 +58,7 @@ export class BoardController {
         try {
           console.log('[MFE DBG] moveDest CSS | display=', cs.display, 'vis=', cs.visibility, 'opacity=', cs.opacity, 'pos=', cs.position, 'z=', cs.zIndex, 'bg=', cs.background, 'bgImg=', cs.backgroundImage);
         } catch {}
-        // Force a visible outline to prove it's above the board; if this is visible, stacking/z-index was the issue
-        try {
-          mdEl.style.outline = '2px solid #00ffff';
-          (mdEl.style as any).outlineOffset = '-2px';
-          mdEl.style.zIndex = '9999';
-          mdEl.style.position = mdEl.style.position || 'relative';
-        } catch {}
+        // Do not mutate styles in production; outlines caused visible artifacts
       }
       // Summarize
       console.log(`[MFE DBG] ${tag} | pieces=${pieces} moveDots=${moveDots}/${moveRings} premove=${p?.showDests ? 'on' : 'off'} dots=${premoveDots}/${premoveRings} last=${lastMove} check=${check} selected=${selectedSquare || 'none'} selCount=${selectedCount} selDests=${selectedDestsLen} | movable.showDests=${m?.showDests} dests=${m?.dests ? (m.dests.size || 0) : 0}`);
