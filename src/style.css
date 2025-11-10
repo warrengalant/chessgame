@@ -14,7 +14,7 @@ html, body, #app {
   position: absolute;
   inset: 35%;
   border-radius: 50%;
-  background: rgba(0, 190, 255, 0.95);
+  background: rgba(0, 170, 0, 0.95);
   pointer-events: none;
   z-index: 5;
 }
@@ -24,7 +24,7 @@ html, body, #app {
   position: absolute;
   inset: 35%;
   border-radius: 50%;
-  background: rgba(255, 170, 0, 0.95);
+  background: rgba(30, 144, 255, 0.95);
   pointer-events: none;
   z-index: 5;
 }
@@ -99,12 +99,12 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 }
 .cg-wrap square.move-dest,
 .cg-wrap cg-square.move-dest {
-  background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important;
+  background: radial-gradient(circle, rgba(0, 170, 0, 0.95) 28%, rgba(0, 170, 0, 0) 30%) !important;
   z-index: 4 !important; /* ensure overlays can sit above pieces */
 }
 .cg-wrap square.premove-dest,
 .cg-wrap cg-square.premove-dest {
-  background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important;
+  background: radial-gradient(circle, rgba(30, 144, 255, 0.95) 28%, rgba(30, 144, 255, 0) 30%) !important;
   z-index: 4 !important; /* ensure overlays can sit above pieces */
 }
 .cg-wrap square.last-move,
@@ -126,14 +126,14 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 .cg-wrap square.move-dest.oc,
 .cg-wrap cg-square.move-dest.oc {
   background: none !important;
-  box-shadow: inset 0 0 0 3px rgba(0, 190, 255, 0.95), inset 0 0 0 6px rgba(0, 190, 255, 0.35) !important;
+  box-shadow: inset 0 0 0 3px rgba(0, 170, 0, 0.95), inset 0 0 0 6px rgba(0, 170, 0, 0.35) !important;
 }
 .cg-wrap square.premove-dest.occupied,
 .cg-wrap cg-square.premove-dest.occupied,
 .cg-wrap square.premove-dest.oc,
 .cg-wrap cg-square.premove-dest.oc {
   background: none !important;
-  box-shadow: inset 0 0 0 3px rgba(255, 170, 0, 0.95), inset 0 0 0 6px rgba(255, 170, 0, 0.35) !important;
+  box-shadow: inset 0 0 0 3px rgba(30, 144, 255, 0.95), inset 0 0 0 6px rgba(30, 144, 255, 0.35) !important;
 }
 
 /* Generic fallback selectors in case tag names differ */
@@ -157,8 +157,8 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
   position: absolute;
   inset: 12%;
   border-radius: 50%;
-  border: 3px solid rgba(0, 190, 255, 0.95);
-  box-shadow: 0 0 0 3px rgba(0, 190, 255, 0.35);
+  border: 3px solid rgba(0, 170, 0, 0.95);
+  box-shadow: 0 0 0 3px rgba(0, 170, 0, 0.35);
   pointer-events: none;
   z-index: 5;
 }
@@ -168,8 +168,8 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
   position: absolute;
   inset: 12%;
   border-radius: 50%;
-  border: 3px solid rgba(255, 170, 0, 0.95);
-  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.35);
+  border: 3px solid rgba(30, 144, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.35);
   pointer-events: none;
   z-index: 5;
 }
@@ -185,8 +185,8 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
   position: absolute;
   inset: 12%;
   border-radius: 50%;
-  border: 3px solid rgba(0, 190, 255, 0.95);
-  box-shadow: 0 0 0 3px rgba(0, 190, 255, 0.35);
+  border: 3px solid rgba(0, 170, 0, 0.95);
+  box-shadow: 0 0 0 3px rgba(0, 170, 0, 0.35);
   pointer-events: none;
   z-index: 5;
 }
@@ -196,18 +196,18 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
   position: absolute;
   inset: 12%;
   border-radius: 50%;
-  border: 3px solid rgba(255, 170, 0, 0.95);
-  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.35);
+  border: 3px solid rgba(30, 144, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.35);
   pointer-events: none;
   z-index: 5;
 }
 
 /* Fallbacks without .cg-wrap scope if structure changes */
 square.move-dest, cg-square.move-dest, .move-dest {
-  background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important;
+  background: radial-gradient(circle, rgba(0, 170, 0, 0.95) 28%, rgba(0, 170, 0, 0) 30%) !important;
 }
 square.premove-dest, cg-square.premove-dest, .premove-dest {
-  background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important;
+  background: radial-gradient(circle, rgba(30, 144, 255, 0.95) 28%, rgba(30, 144, 255, 0) 30%) !important;
 }
 square.last-move, cg-square.last-move, .last-move { box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important; }
 square.selected, cg-square.selected, .selected { box-shadow: inset 0 0 0 3px rgba(64, 196, 255, 0.95) !important; }
