@@ -171,7 +171,11 @@ function applyCustomPieceImages(map?: Record<string, string>) {
     // key format: '<piece>.<color>' e.g. 'bishop.white'
     const [piece, color] = key.split('.') as [string, string];
     if (!piece || !color) continue;
+    // Support both legacy <piece> and newer <cg-piece> renderers, with and without wrapper
     rules.push(`.cg-wrap piece.${piece}.${color} { background-image: url('${url}') !important; }`);
+    rules.push(`.cg-wrap cg-piece.${piece}.${color} { background-image: url('${url}') !important; }`);
+    rules.push(`piece.${piece}.${color} { background-image: url('${url}') !important; }`);
+    rules.push(`cg-piece.${piece}.${color} { background-image: url('${url}') !important; }`);
   }
   const style = document.createElement('style');
   style.id = 'custom-piece-images';
