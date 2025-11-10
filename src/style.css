@@ -50,18 +50,141 @@ body {
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
+  position: absolute !important;
+  z-index: 3 !important;
 }
 
 /* pc30 theme: replace bishops with dragon bishop sprites */
 body.theme-pc30 .cg-wrap piece.bishop.white {
-  background-image: url('/pieces/pc30/white/dragon_bishop.png') !important;
+  background-image: url('pieces/pc30/white/dragon_bishop.png') !important;
 }
 body.theme-pc30 .cg-wrap piece.bishop.black {
-  background-image: url('/pieces/pc30/black/dragon_bishop.png') !important;
+  background-image: url('pieces/pc30/black/dragon_bishop.png') !important;
 }
 
 /* ⚡ HIDE ALL COORDINATES */
 .cg-wrap coords {
   display: none !important;
   visibility: hidden !important;
+}
+
+/* Force visibility of move and premove indicators, and key highlights */
+/* Support both legacy <square> and modern <cg-square> elements */
+.cg-wrap cg-board {
+  position: relative !important;
+  z-index: 1 !important; /* base layer */
+}
+.cg-wrap cg-square,
+.cg-wrap square {
+  position: relative !important; /* allow ::after overlays */
+  z-index: 4 !important; /* above pieces */
+}
+.cg-wrap square.move-dest,
+.cg-wrap cg-square.move-dest {
+  background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important;
+}
+.cg-wrap square.premove-dest,
+.cg-wrap cg-square.premove-dest {
+  background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important;
+}
+.cg-wrap square.last-move,
+.cg-wrap cg-square.last-move {
+  box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important;
+}
+.cg-wrap square.selected,
+.cg-wrap cg-square.selected {
+  box-shadow: inset 0 0 0 3px rgba(64, 196, 255, 0.95) !important;
+}
+.cg-wrap square.check,
+.cg-wrap cg-square.check {
+  box-shadow: inset 0 0 0 3px rgba(255, 64, 64, 0.95) !important;
+}
+
+/* Capture destination rings (occupied squares) */
+.cg-wrap square.move-dest.occupied,
+.cg-wrap cg-square.move-dest.occupied {
+  background: none !important;
+  box-shadow: inset 0 0 0 3px rgba(0, 190, 255, 0.95), inset 0 0 0 6px rgba(0, 190, 255, 0.35) !important;
+}
+.cg-wrap square.premove-dest.occupied,
+.cg-wrap cg-square.premove-dest.occupied {
+  background: none !important;
+  box-shadow: inset 0 0 0 3px rgba(255, 170, 0, 0.95), inset 0 0 0 6px rgba(255, 170, 0, 0.35) !important;
+}
+
+/* Generic fallback selectors in case tag names differ */
+.cg-wrap .move-dest { background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important; }
+.cg-wrap .premove-dest { background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important; }
+.cg-wrap .last-move { box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important; }
+.cg-wrap .selected { box-shadow: inset 0 0 0 3px rgba(64, 196, 255, 0.95) !important; }
+.cg-wrap .check { box-shadow: inset 0 0 0 3px rgba(255, 64, 64, 0.95) !important; }
+
+/* Render capture rings ABOVE pieces using pseudo-elements */
+.cg-wrap cg-square.move-dest.occupied,
+.cg-wrap cg-square.premove-dest.occupied {
+  position: relative !important;
+}
+.cg-wrap cg-square.move-dest.occupied::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 190, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(0, 190, 255, 0.35);
+  pointer-events: none;
+  z-index: 5;
+}
+.cg-wrap cg-square.premove-dest.occupied::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 170, 0, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.35);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Also render pseudo-element rings for legacy <square> tag */
+.cg-wrap square.move-dest.occupied,
+.cg-wrap square.premove-dest.occupied { position: relative !important; }
+.cg-wrap square.move-dest.occupied::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 190, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(0, 190, 255, 0.35);
+  pointer-events: none;
+  z-index: 5;
+}
+.cg-wrap square.premove-dest.occupied::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 170, 0, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.35);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Fallbacks without .cg-wrap scope if structure changes */
+square.move-dest, cg-square.move-dest, .move-dest {
+  background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important;
+}
+square.premove-dest, cg-square.premove-dest, .premove-dest {
+  background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important;
+}
+square.last-move, cg-square.last-move, .last-move { box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important; }
+square.selected, cg-square.selected, .selected { box-shadow: inset 0 0 0 3px rgba(64, 196, 255, 0.95) !important; }
+square.check, cg-square.check, .check { box-shadow: inset 0 0 0 3px rgba(255, 64, 64, 0.95) !important; }
+
+/* Support cg-piece and .piece variants */
+.cg-wrap cg-piece, .cg-wrap .piece {
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  position: absolute !important;
+  z-index: 3 !important;
 }

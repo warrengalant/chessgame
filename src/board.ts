@@ -52,7 +52,7 @@ export class BoardController {
             this.callbacks.onMove({ from: orig, to: dest });
             // Clear any highlights after a successful move
             this.cg.set({ movable: { dests: undefined, showDests: true } });
-            this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+            this.cg.set({ premovable: { dests: undefined, showDests: true } });
             this.lastLegalMap = null;
             this.lastPremoveMap = null;
           },
@@ -67,7 +67,7 @@ export class BoardController {
               this.callbacks.onSelect(null);
               // Clear dots locally on user deselect
               this.cg.set({ movable: { dests: undefined, showDests: true } });
-              this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+              this.cg.set({ premovable: { dests: undefined, showDests: true } });
               this.lastLegalMap = null;
               this.lastPremoveMap = null;
             }
@@ -92,7 +92,7 @@ export class BoardController {
     this.cg.set(update);
     // Reapply last known dots to avoid clearing by set()
     if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
-    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+    if (this.lastPremoveMap) this.cg.set({ premovable: { dests: this.lastPremoveMap, showDests: true } });
   }
 
   setLegalDests(dests: LegalDests) {
@@ -111,7 +111,7 @@ export class BoardController {
     }
     this.cg.set({ movable: { dests: filtered, showDests: true } });
     // Ensure premove dots are not shown concurrently
-    this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+    this.cg.set({ premovable: { dests: undefined, showDests: true } });
     this.lastLegalMap = filtered;
     // timestamp no longer used
     this.lastPremoveMap = null;
@@ -127,21 +127,21 @@ export class BoardController {
     this.cg.set({ draggable: { enabled }, movable: { color: playerColor } });
     // Reapply dots after state changes
     if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
-    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+    if (this.lastPremoveMap) this.cg.set({ premovable: { dests: this.lastPremoveMap, showDests: true } });
   }
 
   setFreeMode(free: boolean) {
     if (!this.cg) return;
     this.cg.set({ movable: { free } });
     if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
-    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+    if (this.lastPremoveMap) this.cg.set({ premovable: { dests: this.lastPremoveMap, showDests: true } });
   }
 
   setPremoveDests(dests: Array<[Square, Square[]]>) {
     if (!this.cg) return;
     if (!dests || dests.length === 0) return; // Ignore empty clears; persist dots
     const map = new Map<string, string[]>(dests);
-    this.cg.set({ premovable: { customDests: map, showDests: true } });
+    this.cg.set({ premovable: { dests: map, showDests: true } });
     // Ensure legal dots are not shown concurrently
     this.cg.set({ movable: { dests: undefined, showDests: true } });
     this.lastPremoveMap = map;
