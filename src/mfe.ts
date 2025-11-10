@@ -24,6 +24,16 @@ function applyTheme(name?: string) {
   // Keep pc30 piece theme sticky unless explicitly disabled in the future
   if (name === 'pc30') {
     body.classList.add('theme-pc30');
+    // Also ensure dragon bishop pieces load with a robust base path
+    try {
+      const path = window.location.pathname || '/';
+      // If embedded under /chessgame-mfe, keep that prefix, else use root
+      const prefix = path.startsWith('/chessgame-mfe') ? '/chessgame-mfe' : '';
+      applyCustomPieceImages({
+        'bishop.white': `${prefix}/pieces/pc30/white/dragon_bishop.png`,
+        'bishop.black': `${prefix}/pieces/pc30/black/dragon_bishop.png`,
+      });
+    } catch {}
     // Do not touch board theme CSS when applying piece theme
     return;
   }
