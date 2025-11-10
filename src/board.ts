@@ -28,6 +28,30 @@ export class BoardController {
   private lastPremoveMap: Map<string, string[]> | null = null;
   private lastSelectTs: number = 0;
 
+  private debugReport(tag: string) {
+    try {
+      const root = this.el as HTMLElement;
+      const doc = root.ownerDocument || document;
+      const count = (sel: string) => doc.querySelectorAll(`#${root.id} ${sel}, ${sel}`).length;
+      const moveDots = count('cg-square.move-dest, square.move-dest, .move-dest');
+      const moveRings = count('cg-square.move-dest.occupied, square.move-dest.occupied, .move-dest.occupied');
+      const premoveDots = count('cg-square.premove-dest, square.premove-dest, .premove-dest');
+      const premoveRings = count('cg-square.premove-dest.occupied, square.premove-dest.occupied, .premove-dest.occupied');
+      const lastMove = count('cg-square.last-move, square.last-move, .last-move');
+      const check = count('cg-square.check, square.check, .check');
+      const pieces = count('piece, cg-piece');
+      const bishops = doc.querySelector(`#${root.id} piece.bishop.white, #${root.id} cg-piece.bishop.white, piece.bishop.white, cg-piece.bishop.white`) as HTMLElement | null;
+      const bg = bishops ? (root.ownerDocument.defaultView || window).getComputedStyle(bishops).backgroundImage : 'n/a';
+      const m = (this.cg as any)?.state?.movable;
+      const p = (this.cg as any)?.state?.premovable;
+      // Summarize
+      console.log(`[MFE DBG] ${tag} | pieces=${pieces} moveDots=${moveDots}/${moveRings} premove=${p?.showDests ? 'on' : 'off'} dots=${premoveDots}/${premoveRings} last=${lastMove} check=${check} | movable.showDests=${m?.showDests} dests=${m?.dests ? (m.dests.size || 0) : 0}`);
+      console.log(`[MFE DBG] ${tag} | bishop.white background-image:`, bg);
+    } catch (e) {
+      console.warn('[MFE DBG] debugReport error', e);
+    }
+  }
+
   constructor(el: HTMLElement, callbacks: BoardCallbacks) {
     this.el = el;
     this.callbacks = callbacks;
@@ -75,6 +99,8 @@ export class BoardController {
         },
       });
       this.callbacks.onReady();
+      // Post-init snapshot for diagnostics
+      setTimeout(() => this.debugReport('init'), 50);
     } catch (e: any) {
       if (this.callbacks.onError) this.callbacks.onError(e?.message || 'init failed');
     }
@@ -93,6 +119,8 @@ export class BoardController {
     // Reapply last known dots to avoid clearing by set()
     if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
     if (this.lastPremoveMap) this.cg.set({ premovable: { dests: this.lastPremoveMap, showDests: true } });
+    // Snapshot after DOM settles
+    setTimeout(() => this.debugReport('setPosition'), 10);
   }
 
   setLegalDests(dests: LegalDests) {
@@ -115,6 +143,8 @@ export class BoardController {
     this.lastLegalMap = filtered;
     // timestamp no longer used
     this.lastPremoveMap = null;
+    console.log('[MFE DBG] setLegalDests applied entries=', filtered.size);
+    setTimeout(() => this.debugReport('setLegalDests'), 10);
   }
 
   setTurn(color: Color) {
@@ -147,6 +177,8 @@ export class BoardController {
     this.lastPremoveMap = map;
     // timestamp no longer used
     this.lastLegalMap = null;
+    console.log('[MFE DBG] setPremoveDests applied entries=', map.size);
+    setTimeout(() => this.debugReport('setPremoveDests'), 10);
   }
 
   clearPremoves() {

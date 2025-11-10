@@ -20,6 +20,7 @@ let boardThemeStyleEl: HTMLStyleElement | null = null;
 let boardTileObserver: ResizeObserver | null = null;
 
 function applyTheme(name?: string) {
+  try { console.log('[MFE DBG] applyTheme called with name=', name); } catch {}
   const body = document.body;
   // Keep pc30 piece theme sticky unless explicitly disabled in the future
   if (name === 'pc30') {
@@ -29,9 +30,13 @@ function applyTheme(name?: string) {
       const path = window.location.pathname || '/';
       // If embedded under /chessgame-mfe, keep that prefix, else use root
       const prefix = path.startsWith('/chessgame-mfe') ? '/chessgame-mfe' : '';
+      console.log('[MFE DBG] applyTheme(pc30) path=', path, 'prefix=', prefix);
+      const whiteUrl = `${prefix}/pieces/pc30/white/dragon_bishop.png`;
+      const blackUrl = `${prefix}/pieces/pc30/black/dragon_bishop.png`;
+      console.log('[MFE DBG] pc30 piece URLs => white:', whiteUrl, 'black:', blackUrl);
       applyCustomPieceImages({
-        'bishop.white': `${prefix}/pieces/pc30/white/dragon_bishop.png`,
-        'bishop.black': `${prefix}/pieces/pc30/black/dragon_bishop.png`,
+        'bishop.white': whiteUrl,
+        'bishop.black': blackUrl,
       });
     } catch {}
     // Do not touch board theme CSS when applying piece theme
@@ -113,6 +118,7 @@ function applyTheme(name?: string) {
     boardThemeStyleEl = null;
   }
   if (pair) {
+    console.log('[MFE DBG] applying board theme', name, pair);
     let css = '';
     if (pair.useImage && pair.imageUrl) {
       // Custom image board - place image above gradient so if image fails, squares remain visible
@@ -126,6 +132,7 @@ function applyTheme(name?: string) {
     style.textContent = css;
     document.head.appendChild(style);
     boardThemeStyleEl = style;
+    console.log('[MFE DBG] injected board theme style id=', style.id);
 
     // Use percentage-based sizing to perfectly align with squares
     // Each square is 12.5% (100% / 8), so 2x2 tile is 25%
@@ -171,6 +178,10 @@ function applyCustomPieceImages(map?: Record<string, string>) {
   style.textContent = rules.join('\n');
   document.head.appendChild(style);
   customStyleEl = style;
+  try {
+    console.log('[MFE DBG] applyCustomPieceImages injected', Object.keys(map).length, 'rules');
+    for (const [k, v] of Object.entries(map)) console.log('  rule', k, '=>', v);
+  } catch {}
 }
 
 function post(type: string, payload: any) {
