@@ -49,6 +49,23 @@ export class BoardController {
       const selectedSquare = (this.cg as any)?.state?.selected || null;
       const selectedDestsLen = m?.dests && selectedSquare && typeof m.dests.get === 'function' ? (m.dests.get(selectedSquare)?.length || 0) : 0;
       const selectedCount = count('cg-square.selected, square.selected, .selected');
+      // Inspect first move-dest square computed styles for diagnostics
+      const mdEl = doc.querySelector(
+        `#${root.id} cg-board square.move-dest, #${root.id} square.move-dest, cg-board square.move-dest, square.move-dest`
+      ) as HTMLElement | null;
+      if (mdEl) {
+        const cs = (root.ownerDocument.defaultView || window).getComputedStyle(mdEl);
+        try {
+          console.log('[MFE DBG] moveDest CSS | display=', cs.display, 'vis=', cs.visibility, 'opacity=', cs.opacity, 'pos=', cs.position, 'z=', cs.zIndex, 'bg=', cs.background, 'bgImg=', cs.backgroundImage);
+        } catch {}
+        // Force a visible outline to prove it's above the board; if this is visible, stacking/z-index was the issue
+        try {
+          mdEl.style.outline = '2px solid #00ffff';
+          (mdEl.style as any).outlineOffset = '-2px';
+          mdEl.style.zIndex = '9999';
+          mdEl.style.position = mdEl.style.position || 'relative';
+        } catch {}
+      }
       // Summarize
       console.log(`[MFE DBG] ${tag} | pieces=${pieces} moveDots=${moveDots}/${moveRings} premove=${p?.showDests ? 'on' : 'off'} dots=${premoveDots}/${premoveRings} last=${lastMove} check=${check} selected=${selectedSquare || 'none'} selCount=${selectedCount} selDests=${selectedDestsLen} | movable.showDests=${m?.showDests} dests=${m?.dests ? (m.dests.size || 0) : 0}`);
       console.log(`[MFE DBG] ${tag} | bishop.white background-image:`, bg);
