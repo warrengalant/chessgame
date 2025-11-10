@@ -1,5 +1,4 @@
 import 'chessground/assets/chessground.base.css';
-import 'chessground/assets/chessground.brown.css';
 import 'chessground/assets/chessground.cburnett.css';
 import './style.css';
 import { BoardController, type InitOptions } from './board';
@@ -89,7 +88,7 @@ function applyTheme(name?: string) {
       dark: '#B8804C',
       border: '#8B5A2B',
       useImage: true,
-      imageUrl: './chessboard.jpg',
+      imageUrl: '/chessgame-mfe/chessboard.jpg',
     } as any,
   };
 
@@ -354,7 +353,7 @@ window.addEventListener('load', () => {
     if (theme) applyTheme(theme);
     const board = usp.get('board');
     if (board) applyTheme(board);
-    if (!theme && !board) applyTheme('blue');
+    if (!theme && !board) applyTheme('custom');
     // Boot position via query params (fallback when parent hasn't init'ed yet)
     const fen = usp.get('fen');
     if (fen) {
