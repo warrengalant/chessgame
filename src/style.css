@@ -76,31 +76,11 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 }
 .cg-wrap square.move-dest,
 .cg-wrap cg-square.move-dest {
-  position: relative !important;
-}
-.cg-wrap square.move-dest::after,
-.cg-wrap cg-square.move-dest::after {
-  content: '';
-  position: absolute;
-  inset: 35%;
-  border-radius: 50%;
-  background: rgba(0, 190, 255, 0.95);
-  pointer-events: none;
-  z-index: 6; /* above pieces */
+  background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important;
 }
 .cg-wrap square.premove-dest,
 .cg-wrap cg-square.premove-dest {
-  position: relative !important;
-}
-.cg-wrap square.premove-dest::after,
-.cg-wrap cg-square.premove-dest::after {
-  content: '';
-  position: absolute;
-  inset: 35%;
-  border-radius: 50%;
-  background: rgba(255, 170, 0, 0.95);
-  pointer-events: none;
-  z-index: 6; /* above pieces */
+  background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important;
 }
 .cg-wrap square.last-move,
 .cg-wrap cg-square.last-move {
@@ -117,31 +97,36 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 
 /* Capture destination rings (occupied squares) */
 .cg-wrap square.move-dest.occupied,
-.cg-wrap cg-square.move-dest.occupied {
+.cg-wrap cg-square.move-dest.occupied,
+.cg-wrap square.move-dest.oc,
+.cg-wrap cg-square.move-dest.oc {
   background: none !important;
   box-shadow: inset 0 0 0 3px rgba(0, 190, 255, 0.95), inset 0 0 0 6px rgba(0, 190, 255, 0.35) !important;
 }
 .cg-wrap square.premove-dest.occupied,
-.cg-wrap cg-square.premove-dest.occupied {
+.cg-wrap cg-square.premove-dest.occupied,
+.cg-wrap square.premove-dest.oc,
+.cg-wrap cg-square.premove-dest.oc {
   background: none !important;
   box-shadow: inset 0 0 0 3px rgba(255, 170, 0, 0.95), inset 0 0 0 6px rgba(255, 170, 0, 0.35) !important;
 }
 
 /* Generic fallback selectors in case tag names differ */
-.cg-wrap .move-dest { position: relative !important; }
-.cg-wrap .move-dest::after { content: ''; position: absolute; inset: 35%; border-radius: 50%; background: rgba(0, 190, 255, 0.95); pointer-events: none; z-index: 6; }
-.cg-wrap .premove-dest { position: relative !important; }
-.cg-wrap .premove-dest::after { content: ''; position: absolute; inset: 35%; border-radius: 50%; background: rgba(255, 170, 0, 0.95); pointer-events: none; z-index: 6; }
+.cg-wrap .move-dest { background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important; }
+.cg-wrap .premove-dest { background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important; }
 .cg-wrap .last-move { box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important; }
 .cg-wrap .selected { box-shadow: inset 0 0 0 3px rgba(64, 196, 255, 0.95) !important; }
 .cg-wrap .check { box-shadow: inset 0 0 0 3px rgba(255, 64, 64, 0.95) !important; }
 
 /* Render capture rings ABOVE pieces using pseudo-elements */
 .cg-wrap cg-square.move-dest.occupied,
-.cg-wrap cg-square.premove-dest.occupied {
+.cg-wrap cg-square.premove-dest.occupied,
+.cg-wrap cg-square.move-dest.oc,
+.cg-wrap cg-square.premove-dest.oc {
   position: relative !important;
 }
-.cg-wrap cg-square.move-dest.occupied::after {
+.cg-wrap cg-square.move-dest.occupied::after,
+.cg-wrap cg-square.move-dest.oc::after {
   content: '';
   position: absolute;
   inset: 12%;
@@ -151,7 +136,8 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
   pointer-events: none;
   z-index: 5;
 }
-.cg-wrap cg-square.premove-dest.occupied::after {
+.cg-wrap cg-square.premove-dest.occupied::after,
+.cg-wrap cg-square.premove-dest.oc::after {
   content: '';
   position: absolute;
   inset: 12%;
@@ -164,8 +150,11 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 
 /* Also render pseudo-element rings for legacy <square> tag */
 .cg-wrap square.move-dest.occupied,
-.cg-wrap square.premove-dest.occupied { position: relative !important; }
-.cg-wrap square.move-dest.occupied::after {
+.cg-wrap square.premove-dest.occupied,
+.cg-wrap square.move-dest.oc,
+.cg-wrap square.premove-dest.oc { position: relative !important; }
+.cg-wrap square.move-dest.occupied::after,
+.cg-wrap square.move-dest.oc::after {
   content: '';
   position: absolute;
   inset: 12%;
@@ -175,7 +164,8 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
   pointer-events: none;
   z-index: 5;
 }
-.cg-wrap square.premove-dest.occupied::after {
+.cg-wrap square.premove-dest.occupied::after,
+.cg-wrap square.premove-dest.oc::after {
   content: '';
   position: absolute;
   inset: 12%;
@@ -187,10 +177,12 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 }
 
 /* Fallbacks without .cg-wrap scope if structure changes */
-square.move-dest, cg-square.move-dest, .move-dest { position: relative !important; }
-square.move-dest::after, cg-square.move-dest::after, .move-dest::after { content: ''; position: absolute; inset: 35%; border-radius: 50%; background: rgba(0, 190, 255, 0.95); pointer-events: none; z-index: 6; }
-square.premove-dest, cg-square.premove-dest, .premove-dest { position: relative !important; }
-square.premove-dest::after, cg-square.premove-dest::after, .premove-dest::after { content: ''; position: absolute; inset: 35%; border-radius: 50%; background: rgba(255, 170, 0, 0.95); pointer-events: none; z-index: 6; }
+square.move-dest, cg-square.move-dest, .move-dest {
+  background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important;
+}
+square.premove-dest, cg-square.premove-dest, .premove-dest {
+  background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important;
+}
 square.last-move, cg-square.last-move, .last-move { box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important; }
 square.selected, cg-square.selected, .selected { box-shadow: inset 0 0 0 3px rgba(64, 196, 255, 0.95) !important; }
 square.check, cg-square.check, .check { box-shadow: inset 0 0 0 3px rgba(255, 64, 64, 0.95) !important; }

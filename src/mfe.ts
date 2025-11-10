@@ -310,6 +310,12 @@ window.addEventListener('message', (evt: MessageEvent) => {
         if (id) ack(id, true);
         break;
       }
+      case 'setSelected': {
+        console.log('[MFE] setSelected', payload?.square ?? null);
+        ensureBoard().setSelected(payload?.square ?? null);
+        if (id) ack(id, true);
+        break;
+      }
       case 'setTurn': {
         console.log('[MFE] setTurn', payload?.color);
         ensureBoard().setTurn(payload?.color);

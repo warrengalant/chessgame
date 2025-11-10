@@ -27,6 +27,7 @@ export class BoardController {
   private lastLegalMap: Map<string, string[]> | null = null;
   private lastPremoveMap: Map<string, string[]> | null = null;
   private lastSelectTs: number = 0;
+  private lastSelectedKey: string | null = null;
 
   private debugReport(tag: string) {
     try {
@@ -34,9 +35,9 @@ export class BoardController {
       const doc = root.ownerDocument || document;
       const count = (sel: string) => doc.querySelectorAll(`#${root.id} ${sel}, ${sel}`).length;
       const moveDots = count('cg-square.move-dest, square.move-dest, .move-dest');
-      const moveRings = count('cg-square.move-dest.occupied, square.move-dest.occupied, .move-dest.occupied');
+      const moveRings = count('cg-square.move-dest.oc, square.move-dest.oc, .move-dest.oc, cg-square.move-dest.occupied, square.move-dest.occupied, .move-dest.occupied');
       const premoveDots = count('cg-square.premove-dest, square.premove-dest, .premove-dest');
-      const premoveRings = count('cg-square.premove-dest.occupied, square.premove-dest.occupied, .premove-dest.occupied');
+      const premoveRings = count('cg-square.premove-dest.oc, square.premove-dest.oc, .premove-dest.oc, cg-square.premove-dest.occupied, square.premove-dest.occupied, .premove-dest.occupied');
       const lastMove = count('cg-square.last-move, square.last-move, .last-move');
       const check = count('cg-square.check, square.check, .check');
       const pieces = count('piece, cg-piece');
@@ -44,8 +45,11 @@ export class BoardController {
       const bg = bishops ? (root.ownerDocument.defaultView || window).getComputedStyle(bishops).backgroundImage : 'n/a';
       const m = (this.cg as any)?.state?.movable;
       const p = (this.cg as any)?.state?.premovable;
+      const selectedSquare = (this.cg as any)?.state?.selected || null;
+      const selectedDestsLen = m?.dests && selectedSquare && typeof m.dests.get === 'function' ? (m.dests.get(selectedSquare)?.length || 0) : 0;
+      const selectedCount = count('cg-square.selected, square.selected, .selected');
       // Summarize
-      console.log(`[MFE DBG] ${tag} | pieces=${pieces} moveDots=${moveDots}/${moveRings} premove=${p?.showDests ? 'on' : 'off'} dots=${premoveDots}/${premoveRings} last=${lastMove} check=${check} | movable.showDests=${m?.showDests} dests=${m?.dests ? (m.dests.size || 0) : 0}`);
+      console.log(`[MFE DBG] ${tag} | pieces=${pieces} moveDots=${moveDots}/${moveRings} premove=${p?.showDests ? 'on' : 'off'} dots=${premoveDots}/${premoveRings} last=${lastMove} check=${check} selected=${selectedSquare || 'none'} selCount=${selectedCount} selDests=${selectedDestsLen} | movable.showDests=${m?.showDests} dests=${m?.dests ? (m.dests.size || 0) : 0}`);
       console.log(`[MFE DBG] ${tag} | bishop.white background-image:`, bg);
     } catch (e) {
       console.warn('[MFE DBG] debugReport error', e);
@@ -83,21 +87,21 @@ export class BoardController {
           select: (key?: string) => {
             if (!this.callbacks.onSelect) return;
             if (key) {
+              try { console.log('[MFE DBG] select', key); } catch {}
               this.lastSelectTs = Date.now();
+              this.lastSelectedKey = key;
               this.callbacks.onSelect(key);
-              // Diagnostic: snapshot after selection
-              try { setTimeout(() => this.debugReport(`select:${key}`), 0); } catch {}
             } else {
               // Ignore immediate deselects right after a select to prevent flicker
               if (Date.now() - this.lastSelectTs < 200) return;
+              try { console.log('[MFE DBG] deselect'); } catch {}
               this.callbacks.onSelect(null);
               // Clear dots locally on user deselect
               this.cg.set({ movable: { dests: undefined, showDests: true } });
               this.cg.set({ premovable: { dests: undefined, showDests: true } });
               this.lastLegalMap = null;
               this.lastPremoveMap = null;
-              // Diagnostic: snapshot after deselect
-              try { setTimeout(() => this.debugReport('deselect'), 0); } catch {}
+              this.lastSelectedKey = null;
             }
           },
         },
@@ -123,6 +127,10 @@ export class BoardController {
     // Reapply last known dots to avoid clearing by set()
     if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
     if (this.lastPremoveMap) this.cg.set({ premovable: { dests: this.lastPremoveMap, showDests: true } });
+    // Restore last selected square so Chessground recomputes move-dest classes
+    if (this.lastSelectedKey) {
+      try { this.cg.set({ selected: this.lastSelectedKey }); } catch {}
+    }
     // Snapshot after DOM settles
     setTimeout(() => this.debugReport('setPosition'), 10);
   }
@@ -183,6 +191,18 @@ export class BoardController {
     this.lastLegalMap = null;
     console.log('[MFE DBG] setPremoveDests applied entries=', map.size);
     setTimeout(() => this.debugReport('setPremoveDests'), 10);
+  }
+
+  setSelected(square: Square | null) {
+    if (!this.cg) return;
+    if (square) {
+      this.lastSelectedKey = square;
+      this.cg.set({ selected: square });
+    } else {
+      this.lastSelectedKey = null;
+      this.cg.set({ selected: undefined });
+    }
+    setTimeout(() => this.debugReport('setSelected'), 10);
   }
 
   clearPremoves() {
