@@ -7,6 +7,28 @@ html, body, #app {
   background: #1a1d29 !important; /* Dark background - NO WHITE FRAMES! */
 }
 
+/* Also render visible DOT overlays for normal (unoccupied) destinations above board */
+.cg-wrap cg-square.move-dest::after,
+.cg-wrap square.move-dest::after {
+  content: '';
+  position: absolute;
+  inset: 35%;
+  border-radius: 50%;
+  background: rgba(0, 190, 255, 0.95);
+  pointer-events: none;
+  z-index: 5;
+}
+.cg-wrap cg-square.premove-dest::after,
+.cg-wrap square.premove-dest::after {
+  content: '';
+  position: absolute;
+  inset: 35%;
+  border-radius: 50%;
+  background: rgba(255, 170, 0, 0.95);
+  pointer-events: none;
+  z-index: 5;
+}
+
 /* BLACK background to match the dark theme - NO WHITE GAPS! */
 html, body {
   background: #1a1d29 !important; /* Dark background matching the site theme */
@@ -77,10 +99,12 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 .cg-wrap square.move-dest,
 .cg-wrap cg-square.move-dest {
   background: radial-gradient(circle, rgba(0, 190, 255, 0.95) 28%, rgba(0, 190, 255, 0) 30%) !important;
+  z-index: 4 !important; /* ensure overlays can sit above pieces */
 }
 .cg-wrap square.premove-dest,
 .cg-wrap cg-square.premove-dest {
   background: radial-gradient(circle, rgba(255, 170, 0, 0.95) 28%, rgba(255, 170, 0, 0) 30%) !important;
+  z-index: 4 !important; /* ensure overlays can sit above pieces */
 }
 .cg-wrap square.last-move,
 .cg-wrap cg-square.last-move {
@@ -124,6 +148,7 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 .cg-wrap cg-square.move-dest.oc,
 .cg-wrap cg-square.premove-dest.oc {
   position: relative !important;
+  z-index: 5 !important; /* above pieces */
 }
 .cg-wrap cg-square.move-dest.occupied::after,
 .cg-wrap cg-square.move-dest.oc::after {
@@ -152,7 +177,7 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 .cg-wrap square.move-dest.occupied,
 .cg-wrap square.premove-dest.occupied,
 .cg-wrap square.move-dest.oc,
-.cg-wrap square.premove-dest.oc { position: relative !important; }
+.cg-wrap square.premove-dest.oc { position: relative !important; z-index: 5 !important; }
 .cg-wrap square.move-dest.occupied::after,
 .cg-wrap square.move-dest.oc::after {
   content: '';

@@ -28,6 +28,7 @@ export class BoardController {
   private lastPremoveMap: Map<string, string[]> | null = null;
   private lastSelectTs: number = 0;
   private lastSelectedKey: string | null = null;
+  private suppressNextSelectEvent: boolean = false;
 
   private debugReport(tag: string) {
     try {
@@ -87,6 +88,10 @@ export class BoardController {
           select: (key?: string) => {
             if (!this.callbacks.onSelect) return;
             if (key) {
+              if (this.suppressNextSelectEvent) {
+                this.suppressNextSelectEvent = false;
+                return;
+              }
               try { console.log('[MFE DBG] select', key); } catch {}
               this.lastSelectTs = Date.now();
               this.lastSelectedKey = key;
@@ -197,9 +202,11 @@ export class BoardController {
     if (!this.cg) return;
     if (square) {
       this.lastSelectedKey = square;
+      this.suppressNextSelectEvent = true;
       this.cg.set({ selected: square });
     } else {
       this.lastSelectedKey = null;
+      this.suppressNextSelectEvent = true;
       this.cg.set({ selected: undefined });
     }
     setTimeout(() => this.debugReport('setSelected'), 10);
