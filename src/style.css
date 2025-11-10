@@ -50,17 +50,9 @@ body {
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
-  position: absolute !important;
-  z-index: 3 !important;
 }
 
-/* pc30 theme: replace bishops with dragon bishop sprites */
-body.theme-pc30 .cg-wrap piece.bishop.white {
-  background-image: url('pieces/pc30/white/dragon_bishop.png') !important;
-}
-body.theme-pc30 .cg-wrap piece.bishop.black {
-  background-image: url('pieces/pc30/black/dragon_bishop.png') !important;
-}
+/* pc30 theme: (temporarily disable custom bishop sprites to avoid 404s) */
 
 /* ⚡ HIDE ALL COORDINATES */
 .cg-wrap coords {
@@ -70,14 +62,9 @@ body.theme-pc30 .cg-wrap piece.bishop.black {
 
 /* Force visibility of move and premove indicators, and key highlights */
 /* Support both legacy <square> and modern <cg-square> elements */
-.cg-wrap cg-board {
-  position: relative !important;
-  z-index: 1 !important; /* base layer */
-}
 .cg-wrap cg-square,
 .cg-wrap square {
   position: relative !important; /* allow ::after overlays */
-  z-index: 4 !important; /* above pieces */
 }
 .cg-wrap square.move-dest,
 .cg-wrap cg-square.move-dest {

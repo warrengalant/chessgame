@@ -105,8 +105,8 @@ function applyTheme(name?: string) {
   if (pair) {
     let css = '';
     if (pair.useImage && pair.imageUrl) {
-      // Custom image board - use image as background, no conic gradient
-      css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: url('${pair.imageUrl}') !important;\n  background-size: 100% 100% !important;\n  background-position: center !important;\n  background-repeat: no-repeat !important;\n}`;
+      // Custom image board - place image above gradient so if image fails, squares remain visible
+      css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: url('${pair.imageUrl}'), conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: 100% 100%, 25% 25% !important;\n  background-position: center, center !important;\n  background-repeat: no-repeat, repeat !important;\n}`;
     } else {
       // Standard theme with conic gradient
       css = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, calc(100%/4) calc(100%/4) !important;\n  background-blend-mode: normal, normal !important;\n}`;
@@ -125,7 +125,7 @@ function applyTheme(name?: string) {
       if (!board || !styleEl) return;
       // If using a custom image theme, keep the image and do NOT overwrite with gradient
       if ((pair as any).useImage && (pair as any).imageUrl) {
-        styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: url('${(pair as any).imageUrl}') !important;\n  background-size: 100% 100% !important;\n  background-position: center !important;\n  background-repeat: no-repeat !important;\n}`;
+        styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: url('${(pair as any).imageUrl}'), conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: 100% 100%, 25% 25% !important;\n  background-position: center, center !important;\n  background-repeat: no-repeat, repeat !important;\n}`;
       } else {
         // Use 25% for perfect alignment with 8x8 grid (2x2 tile pattern)
         styleEl.textContent = `cg-board {\n  background-color: ${pair.light} !important;\n  background-image: ${pair.pattern || 'none'}, conic-gradient(${pair.dark} 90deg, ${pair.light} 0 180deg, ${pair.dark} 0 270deg, ${pair.light} 0) !important;\n  background-size: auto, 25% 25% !important;\n  background-blend-mode: normal, normal !important;\n}`;
