@@ -92,6 +92,7 @@ export class BoardController {
           enabled: true, 
           showDests: true, 
           castle: true,
+          unrestrictedPremoves: true as any, // CRITICAL: Don't trim premove dests based on friendly pieces! (type not in old @types)
           events: {
             set: (orig: Square, dest: Square) => {
               if (this.callbacks.onPremoveSelect) {
@@ -100,7 +101,7 @@ export class BoardController {
             },
             unset: () => {}
           }
-        },
+        } as any,
         highlight: { lastMove: true, check: true },
         events: {
           move: (orig: Square, dest: Square) => {
@@ -235,11 +236,10 @@ export class BoardController {
     const map = new Map<string, string[]>(dests);
     console.log('[MFE DBG] setPremoveDests setting map:', Array.from(map.entries()));
     // Set premove destinations - Chessground will render them
+    // CRITICAL: Do NOT clear movable.dests! Chessground uses it to filter premove destinations!
+    // With unrestrictedPremoves: true, Chessground won't trim based on friendly pieces
     this.cg.set({ premovable: { enabled: true, showDests: true, dests: map } });
-    // Clear legal move dots so only premove dots show - keep showDests true!
-    this.cg.set({ movable: { dests: new Map(), showDests: true } });
     this.lastPremoveMap = map;
-    this.lastLegalMap = null;
     console.log('[MFE DBG] setPremoveDests applied entries=', map.size);
     setTimeout(() => this.debugReport('setPremoveDests'), 10);
   }
