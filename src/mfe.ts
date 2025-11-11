@@ -250,6 +250,7 @@ function ensureBoard() {
     onMove: (m) => post('move', m),
     onSelect: (sq) => post('select', { square: sq }),
     onError: (m) => error(m),
+    onPremoveSelect: (m) => post('premoveSelect', m),
   });
   return controller;
 }

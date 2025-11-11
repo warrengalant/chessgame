@@ -18,6 +18,7 @@ export type BoardCallbacks = {
   onMove: (payload: { from: Square; to: Square; promotion?: string }) => void;
   onSelect?: (square: Square | null) => void;
   onError?: (message: string) => void;
+  onPremoveSelect?: (payload: { from: Square; to: Square }) => void;
 };
 
 export class BoardController {
@@ -87,7 +88,19 @@ export class BoardController {
         draggable: { enabled: true, distance: 0, autoDistance: true, showGhost: true },
         selectable: { enabled: true },
         movable: { color: opts.playerColor || 'both', free: false, showDests: true },
-        premovable: { enabled: true, showDests: true, castle: true },
+        premovable: { 
+          enabled: true, 
+          showDests: true, 
+          castle: true,
+          events: {
+            set: (orig: Square, dest: Square) => {
+              if (this.callbacks.onPremoveSelect) {
+                this.callbacks.onPremoveSelect({ from: orig, to: dest });
+              }
+            },
+            unset: () => {}
+          }
+        },
         highlight: { lastMove: true, check: true },
         events: {
           move: (orig: Square, dest: Square) => {
