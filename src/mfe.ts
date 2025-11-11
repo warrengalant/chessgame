@@ -347,7 +347,7 @@ window.addEventListener('message', (evt: MessageEvent) => {
         break;
       }
       case 'clearPremoveDestsMap': {
-        console.log('[MFE] clearPremoveDestsMap');
+        console.log('[MFE] clearPremoveDestsMap - FORCE CLEARING DOTS');
         ensureBoard().clearPremoveDestsMap();
         if (id) ack(id, true);
         break;
