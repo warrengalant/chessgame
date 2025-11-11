@@ -29,6 +29,8 @@ export class BoardController {
   private lastSelectTs: number = 0;
   private lastSelectedKey: string | null = null;
   private suppressNextSelectEvent: boolean = false;
+  // Save/restore current premove highlight between previews
+  private savedPremCurrent: [Square, Square] | null = null;
 
   private debugReport(tag: string) {
     try {
@@ -106,6 +108,14 @@ export class BoardController {
               try { console.log('[MFE DBG] select', key); } catch {}
               this.lastSelectTs = Date.now();
               this.lastSelectedKey = key;
+              // Temporarily hide existing premove current while previewing another piece
+              try {
+                const cur = (this.cg as any)?.state?.premovable?.current as [Square, Square] | undefined;
+                if (cur && (!this.savedPremCurrent || (this.savedPremCurrent[0] !== cur[0] || this.savedPremCurrent[1] !== cur[1]))) {
+                  this.savedPremCurrent = [cur[0], cur[1]];
+                  (this.cg as any).set({ premovable: { current: undefined, showDests: true } });
+                }
+              } catch {}
               this.callbacks.onSelect(key);
             } else {
               // Ignore immediate deselects right after a select to prevent flicker
@@ -118,6 +128,11 @@ export class BoardController {
               this.lastLegalMap = null;
               this.lastPremoveMap = null;
               this.lastSelectedKey = null;
+              // Restore previously hidden premove current highlight
+              if (this.savedPremCurrent) {
+                try { (this.cg as any).set({ premovable: { current: this.savedPremCurrent, showDests: true } }); } catch {}
+                this.savedPremCurrent = null;
+              }
             }
           },
         },
@@ -209,11 +224,21 @@ export class BoardController {
     setTimeout(() => this.debugReport('setPremoveDests'), 10);
   }
 
+  // Clear the premovable dests map while keeping premoves enabled and showDests on
+  clearPremoveDestsMap() {
+    if (!this.cg) return;
+    this.cg.set({ premovable: { dests: undefined, showDests: true } });
+    this.lastPremoveMap = null;
+    setTimeout(() => this.debugReport('clearPremoveDests'), 10);
+  }
+
   // Show a persistent highlight that a premove has been set (origin/destination)
   setPremoveCurrent(from: Square, to: Square) {
     if (!this.cg) return;
     try {
-      (this.cg as any).set({ premovable: { current: [from, to], showDests: true } });
+      const cur: [Square, Square] = [from, to];
+      (this.cg as any).set({ premovable: { current: cur, showDests: true } });
+      this.savedPremCurrent = cur; // Keep in sync so we can restore across previews
       // Do not clear existing dest maps; just add current highlight
       this.lastSelectedKey = null;
       setTimeout(() => this.debugReport('setPremoveCurrent'), 10);
