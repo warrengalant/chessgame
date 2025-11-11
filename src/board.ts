@@ -92,7 +92,9 @@ export class BoardController {
           enabled: true, 
           showDests: true, 
           castle: true,
-          unrestrictedPremoves: true as any, // CRITICAL: Don't trim premove dests based on friendly pieces! (type not in old @types)
+          // CRITICAL FIX: Do NOT use unrestrictedPremoves! It causes Chessground to calculate
+          // its own premove destinations using its internal premove() function, which shows
+          // wrong dots through friendly pieces on first click. We provide our own via customDests.
           events: {
             set: (orig: Square, dest: Square) => {
               if (this.callbacks.onPremoveSelect) {
