@@ -240,7 +240,8 @@ export class BoardController {
   // Clear the premovable dests map while keeping premoves enabled and showDests on
   clearPremoveDestsMap() {
     if (!this.cg) return;
-    this.cg.set({ premovable: { dests: undefined, showDests: true } });
+    // Use an explicit empty Map to force Chessground to remove all premove-dest classes
+    this.cg.set({ premovable: { dests: new Map(), showDests: true } });
     this.lastPremoveMap = null;
     setTimeout(() => this.debugReport('clearPremoveDests'), 10);
   }
