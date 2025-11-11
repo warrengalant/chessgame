@@ -92,9 +92,7 @@ export class BoardController {
           enabled: true, 
           showDests: true, 
           castle: true,
-          // CRITICAL FIX: Do NOT use unrestrictedPremoves! It causes Chessground to calculate
-          // its own premove destinations using its internal premove() function, which shows
-          // wrong dots through friendly pieces on first click. We provide our own via customDests.
+          unrestrictedPremoves: true as any, // CRITICAL: Don't trim premove dests based on friendly pieces! (type not in old @types)
           events: {
             set: (orig: Square, dest: Square) => {
               if (this.callbacks.onPremoveSelect) {
@@ -251,11 +249,6 @@ export class BoardController {
         }
       }
     }
-    
-    // CRITICAL FIX: Clear movable.dests to prevent green legal move dots from showing!
-    // When setting premove dots, we MUST clear legal move dots or they will show instead
-    this.cg.set({ movable: { dests: new Map(), showDests: true } });
-    this.lastLegalMap = null;
     
     // CRITICAL FIX: Use customDests instead of dests!
     // premovable.dests = cg.Key[] (array for currently selected piece - internal use)
