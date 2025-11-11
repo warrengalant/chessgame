@@ -235,6 +235,21 @@ export class BoardController {
     
     const map = new Map<string, string[]>(dests);
     console.log('[MFE DBG] setPremoveDests setting map:', Array.from(map.entries()));
+    
+    // Log which squares have pieces for debugging anticipation highlights
+    const pieces = (this.cg as any)?.state?.pieces;
+    if (pieces) {
+      for (const [from, tos] of map.entries()) {
+        const occupied = tos.filter(to => pieces.has(to));
+        if (occupied.length > 0) {
+          console.log(`[MFE DBG] Premove from ${from} includes occupied squares:`, occupied.map(sq => {
+            const p = pieces.get(sq);
+            return `${sq}(${p?.color} ${p?.role})`;
+          }));
+        }
+      }
+    }
+    
     // CRITICAL FIX: Use customDests instead of dests!
     // premovable.dests = cg.Key[] (array for currently selected piece - internal use)
     // premovable.customDests = cg.Dests (Map format - for providing custom destinations)
