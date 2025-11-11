@@ -234,8 +234,8 @@ export class BoardController {
     const map = new Map<string, string[]>(dests);
     // Reset the premovable state completely to avoid interference with previous state
     this.cg.set({ premovable: { enabled: true, showDests: true, dests: map } });
-    // Ensure legal dots are not shown concurrently
-    this.cg.set({ movable: { dests: undefined, showDests: true } });
+    // Ensure legal dots are not shown concurrently - CRITICAL: set showDests to FALSE!
+    this.cg.set({ movable: { dests: new Map(), showDests: false } });
     this.lastPremoveMap = map;
     // timestamp no longer used
     this.lastLegalMap = null;
