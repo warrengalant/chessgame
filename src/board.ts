@@ -92,7 +92,6 @@ export class BoardController {
           enabled: true, 
           showDests: true, 
           castle: true,
-          unrestrictedPremoves: true as any, // CRITICAL: Don't trim premove dests based on friendly pieces! (type not in old @types)
           events: {
             set: (orig: Square, dest: Square) => {
               if (this.callbacks.onPremoveSelect) {
@@ -108,7 +107,7 @@ export class BoardController {
             this.callbacks.onMove({ from: orig, to: dest });
             // Clear any highlights after a successful move
             this.cg.set({ movable: { dests: undefined, showDests: true } });
-            this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+            this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
             this.lastLegalMap = null;
             this.lastPremoveMap = null;
           },
@@ -122,6 +121,7 @@ export class BoardController {
               try { console.log('[MFE DBG] select', key); } catch {}
               this.lastSelectTs = Date.now();
               this.lastSelectedKey = key;
+              try { this.cg.set({ premovable: { dests: [], showDests: true } }); } catch {}
               // Temporarily hide existing premove current while previewing another piece
               try {
                 const cur = (this.cg as any)?.state?.premovable?.current as [Square, Square] | undefined;
@@ -138,7 +138,8 @@ export class BoardController {
               this.callbacks.onSelect(null);
               // Clear dots locally on user deselect
               this.cg.set({ movable: { dests: undefined, showDests: true } });
-              this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+              this.cg.set({ premovable: { dests: [], showDests: true } });
+              this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
               this.lastLegalMap = null;
               this.lastPremoveMap = null;
               this.lastSelectedKey = null;
@@ -196,6 +197,7 @@ export class BoardController {
     }
     this.cg.set({ movable: { dests: filtered, showDests: true } });
     // Clear premove dots when setting legal dots (your turn)
+    this.cg.set({ premovable: { dests: [], showDests: true } });
     this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
     this.lastLegalMap = filtered;
     this.lastPremoveMap = null;
@@ -228,6 +230,7 @@ export class BoardController {
     
     if (!dests || dests.length === 0) {
       // Clear premove dots if no destinations
+      this.cg.set({ premovable: { dests: [], showDests: true } });
       this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
       this.lastPremoveMap = null;
       return;
@@ -235,25 +238,13 @@ export class BoardController {
     
     const map = new Map<string, string[]>(dests);
     console.log('[MFE DBG] setPremoveDests setting map:', Array.from(map.entries()));
-    
-    // Log which squares have pieces for debugging anticipation highlights
-    const pieces = (this.cg as any)?.state?.pieces;
-    if (pieces) {
-      for (const [from, tos] of map.entries()) {
-        const occupied = tos.filter(to => pieces.has(to));
-        if (occupied.length > 0) {
-          console.log(`[MFE DBG] Premove from ${from} includes occupied squares:`, occupied.map(sq => {
-            const p = pieces.get(sq);
-            return `${sq}(${p?.color} ${p?.role})`;
-          }));
-        }
-      }
-    }
-    
-    // CRITICAL FIX: Use customDests instead of dests!
-    // premovable.dests = cg.Key[] (array for currently selected piece - internal use)
-    // premovable.customDests = cg.Dests (Map format - for providing custom destinations)
-    // This tells Chessground to use OUR calculated destinations instead of its internal premove() function
+    const first = map.entries().next().value as [string, string[]];
+    const from = first?.[0] as Square;
+    try {
+      this.suppressNextSelectEvent = true;
+      (this.cg as any).set({ selected: from });
+    } catch {}
+    try { this.cg.set({ premovable: { dests: [], showDests: true } }); } catch {}
     this.cg.set({ premovable: { enabled: true, showDests: true, customDests: map } });
     this.lastPremoveMap = map;
     console.log('[MFE DBG] setPremoveDests applied entries=', map.size);
@@ -265,7 +256,7 @@ export class BoardController {
     if (!this.cg) return;
     try {
       console.log('[MFE] Clearing premove dots');
-      // CRITICAL: Clear customDests, not dests
+      this.cg.set({ premovable: { dests: [], showDests: true } });
       this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
       this.lastPremoveMap = null;
     } catch (e) {
@@ -295,10 +286,12 @@ export class BoardController {
       this.lastSelectedKey = square;
       this.suppressNextSelectEvent = true;
       this.cg.set({ selected: square });
+      try { this.cg.set({ premovable: { dests: [], showDests: true } }); } catch {}
     } else {
       this.lastSelectedKey = null;
       this.suppressNextSelectEvent = true;
       this.cg.set({ selected: undefined });
+      try { this.cg.set({ premovable: { dests: [], showDests: true } }); } catch {}
     }
     setTimeout(() => this.debugReport('setSelected'), 10);
   }
