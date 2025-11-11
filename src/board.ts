@@ -250,6 +250,11 @@ export class BoardController {
       }
     }
     
+    // CRITICAL FIX: Clear movable.dests to prevent green legal move dots from showing!
+    // When setting premove dots, we MUST clear legal move dots or they will show instead
+    this.cg.set({ movable: { dests: new Map(), showDests: true } });
+    this.lastLegalMap = null;
+    
     // CRITICAL FIX: Use customDests instead of dests!
     // premovable.dests = cg.Key[] (array for currently selected piece - internal use)
     // premovable.customDests = cg.Dests (Map format - for providing custom destinations)
