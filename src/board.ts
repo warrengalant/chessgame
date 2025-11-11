@@ -225,9 +225,15 @@ export class BoardController {
 
   setPremoveDests(dests: Array<[Square, Square[]]>) {
     if (!this.cg) return;
-    if (!dests || dests.length === 0) return; // Ignore empty clears; persist dots
+    // Clear any previous dots first, then set the new ones
+    // This ensures a fresh state for each new premove selection
+    this.clearPremoveDestsMap();
+    
+    if (!dests || dests.length === 0) return;
+    
     const map = new Map<string, string[]>(dests);
-    this.cg.set({ premovable: { dests: map, showDests: true } });
+    // Reset the premovable state completely to avoid interference with previous state
+    this.cg.set({ premovable: { enabled: true, showDests: true, dests: map } });
     // Ensure legal dots are not shown concurrently
     this.cg.set({ movable: { dests: undefined, showDests: true } });
     this.lastPremoveMap = map;
@@ -240,9 +246,25 @@ export class BoardController {
   // Clear the premovable dests map while keeping premoves enabled and showDests on
   clearPremoveDestsMap() {
     if (!this.cg) return;
-    // Use an explicit empty Map to force Chessground to remove all premove-dest classes
-    this.cg.set({ premovable: { dests: new Map(), showDests: true } });
-    this.lastPremoveMap = null;
+    try {
+      // NUCLEAR OPTION: Complete disable + re-enable cycle forces Chessground to clear internal state
+      console.log('[MFE] FORCE CLEARING all premove dots');
+      // Step 1: Disable premovable completely
+      this.cg.set({ premovable: { enabled: false, showDests: false, dests: null, current: null } });
+      // Step 2: Remove any current selection which might be maintaining state
+      this.cg.set({ selected: null });
+      // Step 3: Re-enable premovable with empty dests map
+      this.cg.set({ premovable: { enabled: true, showDests: true, dests: new Map() } });
+      // Step 4: Explicitly clear cached maps
+      this.lastPremoveMap = null;
+      // Step 5: Call internal CGround clean methods if they exist
+      if (this.cg.cancelPremove) this.cg.cancelPremove();
+      if (this.cg.cancelMove) this.cg.cancelMove();
+      // Step 6: Force redraw
+      if (this.cg.redrawAll) this.cg.redrawAll();
+    } catch (e) {
+      console.error('[MFE] Error clearing premove dots', e);
+    }
     setTimeout(() => this.debugReport('clearPremoveDests'), 10);
   }
 
