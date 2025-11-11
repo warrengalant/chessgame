@@ -194,11 +194,8 @@ export class BoardController {
       if (clean.length > 0) filtered.set(orig, clean);
     }
     this.cg.set({ movable: { dests: filtered, showDests: true } });
-    // Ensure premove dots are not shown concurrently
-    this.cg.set({ premovable: { dests: undefined, showDests: true } });
+    // DO NOT clear premove dots here - they should only be cleared explicitly
     this.lastLegalMap = filtered;
-    // timestamp no longer used
-    this.lastPremoveMap = null;
     console.log('[MFE DBG] setLegalDests applied entries=', filtered.size);
     setTimeout(() => this.debugReport('setLegalDests'), 10);
   }
@@ -225,19 +222,20 @@ export class BoardController {
 
   setPremoveDests(dests: Array<[Square, Square[]]>) {
     if (!this.cg) return;
-    // Clear any previous dots first, then set the new ones
-    // This ensures a fresh state for each new premove selection
-    this.clearPremoveDestsMap();
     
-    if (!dests || dests.length === 0) return;
+    if (!dests || dests.length === 0) {
+      // Clear premove dots if no destinations
+      this.cg.set({ premovable: { dests: new Map(), showDests: true } });
+      this.lastPremoveMap = null;
+      return;
+    }
     
     const map = new Map<string, string[]>(dests);
-    // Reset the premovable state completely to avoid interference with previous state
+    // Set premove destinations - Chessground will render them
     this.cg.set({ premovable: { enabled: true, showDests: true, dests: map } });
-    // Ensure legal dots are not shown concurrently - CRITICAL: set showDests to FALSE!
-    this.cg.set({ movable: { dests: new Map(), showDests: false } });
+    // Clear legal move dots so only premove dots show
+    this.cg.set({ movable: { dests: new Map(), showDests: true } });
     this.lastPremoveMap = map;
-    // timestamp no longer used
     this.lastLegalMap = null;
     console.log('[MFE DBG] setPremoveDests applied entries=', map.size);
     setTimeout(() => this.debugReport('setPremoveDests'), 10);
@@ -247,21 +245,10 @@ export class BoardController {
   clearPremoveDestsMap() {
     if (!this.cg) return;
     try {
-      // NUCLEAR OPTION: Complete disable + re-enable cycle forces Chessground to clear internal state
-      console.log('[MFE] FORCE CLEARING all premove dots');
-      // Step 1: Disable premovable completely
-      this.cg.set({ premovable: { enabled: false, showDests: false, dests: null, current: null } });
-      // Step 2: Remove any current selection which might be maintaining state
-      this.cg.set({ selected: null });
-      // Step 3: Re-enable premovable with empty dests map
-      this.cg.set({ premovable: { enabled: true, showDests: true, dests: new Map() } });
-      // Step 4: Explicitly clear cached maps
+      console.log('[MFE] Clearing premove dots');
+      // Simple clear - just set empty dests map
+      this.cg.set({ premovable: { dests: new Map(), showDests: true } });
       this.lastPremoveMap = null;
-      // Step 5: Call internal CGround clean methods if they exist
-      if (this.cg.cancelPremove) this.cg.cancelPremove();
-      if (this.cg.cancelMove) this.cg.cancelMove();
-      // Step 6: Force redraw
-      if (this.cg.redrawAll) this.cg.redrawAll();
     } catch (e) {
       console.error('[MFE] Error clearing premove dots', e);
     }
