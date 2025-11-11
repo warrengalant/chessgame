@@ -98,6 +98,7 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 .cg-wrap square.last-move,
 .cg-wrap cg-square.last-move {
   box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important;
+  background-color: rgba(255, 215, 0, 0.35) !important; /* solid fill under pieces */
 }
 .cg-wrap square.selected,
 .cg-wrap cg-square.selected {
@@ -107,7 +108,7 @@ body.theme-pc30 .cg-wrap cg-piece.bishop.black {
 .cg-wrap cg-square.current-premove {
   /* Persistent highlight indicating a premove is set */
   box-shadow: inset 0 0 0 3px rgba(30, 144, 255, 0.95) !important;
-  background-color: rgba(30, 144, 255, 0.16) !important;
+  background-color: rgba(30, 144, 255, 0.35) !important; /* solid fill under pieces */
 }
 .cg-wrap square.check,
 .cg-wrap cg-square.check {
@@ -205,11 +206,11 @@ square.move-dest, cg-square.move-dest, .move-dest {
 square.premove-dest, cg-square.premove-dest, .premove-dest {
   background: radial-gradient(circle, rgba(30, 144, 255, 0.95) 18%, rgba(30, 144, 255, 0) 20%) !important;
 }
-square.last-move, cg-square.last-move, .last-move { box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important; }
+square.last-move, cg-square.last-move, .last-move { box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.9) !important; background-color: rgba(255, 215, 0, 0.35) !important; }
 square.selected, cg-square.selected, .selected { box-shadow: inset 0 0 0 3px rgba(64, 196, 255, 0.95) !important; }
 square.current-premove, cg-square.current-premove, .current-premove {
   box-shadow: inset 0 0 0 3px rgba(30, 144, 255, 0.95) !important;
-  background-color: rgba(30, 144, 255, 0.16) !important;
+  background-color: rgba(30, 144, 255, 0.35) !important;
 }
 square.check, cg-square.check, .check { box-shadow: inset 0 0 0 3px rgba(255, 64, 64, 0.95) !important; }
 
