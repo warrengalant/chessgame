@@ -194,8 +194,10 @@ export class BoardController {
       if (clean.length > 0) filtered.set(orig, clean);
     }
     this.cg.set({ movable: { dests: filtered, showDests: true } });
-    // DO NOT clear premove dots here - they should only be cleared explicitly
+    // Clear premove dots when setting legal dots (your turn)
+    this.cg.set({ premovable: { dests: new Map(), showDests: true } });
     this.lastLegalMap = filtered;
+    this.lastPremoveMap = null;
     console.log('[MFE DBG] setLegalDests applied entries=', filtered.size);
     setTimeout(() => this.debugReport('setLegalDests'), 10);
   }
@@ -231,9 +233,10 @@ export class BoardController {
     }
     
     const map = new Map<string, string[]>(dests);
+    console.log('[MFE DBG] setPremoveDests setting map:', Array.from(map.entries()));
     // Set premove destinations - Chessground will render them
     this.cg.set({ premovable: { enabled: true, showDests: true, dests: map } });
-    // Clear legal move dots so only premove dots show
+    // Clear legal move dots so only premove dots show - keep showDests true!
     this.cg.set({ movable: { dests: new Map(), showDests: true } });
     this.lastPremoveMap = map;
     this.lastLegalMap = null;
