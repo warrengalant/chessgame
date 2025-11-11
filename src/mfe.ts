@@ -346,6 +346,12 @@ window.addEventListener('message', (evt: MessageEvent) => {
         if (id) ack(id, true);
         break;
       }
+      case 'clearPremoveDestsMap': {
+        console.log('[MFE] clearPremoveDestsMap');
+        ensureBoard().clearPremoveDestsMap();
+        if (id) ack(id, true);
+        break;
+      }
       case 'playPremove': {
         ensureBoard().playPremove();
         if (id) ack(id, true);
