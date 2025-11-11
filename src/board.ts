@@ -35,6 +35,7 @@ export class BoardController {
 
   private debugReport(tag: string) {
     try {
+      try { if (!(window as any).__PC30_DEBUG__) return; } catch {}
       const root = this.el as HTMLElement;
       const doc = root.ownerDocument || document;
       const count = (sel: string) => doc.querySelectorAll(`#${root.id} ${sel}, ${sel}`).length;
