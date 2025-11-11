@@ -109,6 +109,9 @@ export class BoardController {
             // Clear any highlights after a successful move
             this.cg.set({ movable: { dests: undefined, showDests: true } });
             this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+            // Ensure no square remains selected after a normal move
+            this.cg.set({ selected: undefined });
+            this.lastSelectedKey = null;
             this.lastLegalMap = null;
             this.lastPremoveMap = null;
           },
@@ -172,10 +175,6 @@ export class BoardController {
     // Reapply last known dots to avoid clearing by set()
     if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
     if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
-    // Restore last selected square so Chessground recomputes move-dest classes
-    if (this.lastSelectedKey) {
-      try { this.cg.set({ selected: this.lastSelectedKey }); } catch {}
-    }
     // Snapshot after DOM settles
     setTimeout(() => this.debugReport('setPosition'), 10);
   }
