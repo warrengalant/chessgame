@@ -209,6 +209,19 @@ export class BoardController {
     setTimeout(() => this.debugReport('setPremoveDests'), 10);
   }
 
+  // Show a persistent highlight that a premove has been set (origin/destination)
+  setPremoveCurrent(from: Square, to: Square) {
+    if (!this.cg) return;
+    try {
+      (this.cg as any).set({ premovable: { current: [from, to], showDests: true } });
+      // Do not clear existing dest maps; just add current highlight
+      this.lastSelectedKey = null;
+      setTimeout(() => this.debugReport('setPremoveCurrent'), 10);
+    } catch (e) {
+      try { console.warn('[MFE DBG] setPremoveCurrent error', e); } catch {}
+    }
+  }
+
   setSelected(square: Square | null) {
     if (!this.cg) return;
     if (square) {

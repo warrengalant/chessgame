@@ -310,6 +310,12 @@ window.addEventListener('message', (evt: MessageEvent) => {
         if (id) ack(id, true);
         break;
       }
+      case 'setPremoveCurrent': {
+        // payload: { from: string, to: string }
+        ensureBoard().setPremoveCurrent(payload?.from, payload?.to);
+        if (id) ack(id, true);
+        break;
+      }
       case 'setSelected': {
         console.log('[MFE] setSelected', payload?.square ?? null);
         ensureBoard().setSelected(payload?.square ?? null);
