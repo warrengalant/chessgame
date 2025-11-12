@@ -95,6 +95,7 @@ export class BoardController {
           additionalPremoveRequirements: () => false,
           events: {
             set: (orig: Square, dest: Square) => {
+              try { console.log('[MFE DBG] premoveSelect event from Chessground', orig, '→', dest); } catch {}
               if (this.callbacks.onPremoveSelect) {
                 this.callbacks.onPremoveSelect({ from: orig, to: dest });
               }
