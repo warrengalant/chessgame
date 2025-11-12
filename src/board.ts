@@ -118,6 +118,7 @@ export class BoardController {
             if (!this.callbacks.onSelect) return;
             if (key) {
               if (this.suppressNextSelectEvent) {
+                try { console.log('[MFE DBG] select suppressed by suppressNextSelectEvent for', key); } catch {}
                 this.suppressNextSelectEvent = false;
                 return;
               }
@@ -272,6 +273,7 @@ export class BoardController {
       const movableColor = st?.movable?.color;
       const isPlayersTurn = movableColor && movableColor !== 'both' && st?.turnColor === movableColor;
       if (isPlayersTurn) {
+        try { console.log('[MFE DBG] setPremoveDests ignored: player\'s turn. Clearing customDests.'); } catch {}
         this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
         this.lastPremoveMap = null;
         return;
@@ -350,7 +352,7 @@ export class BoardController {
       this.cg.set({ selected: square });
     } else {
       this.lastSelectedKey = null;
-      this.suppressNextSelectEvent = true;
+      // Do not suppress next user select on programmatic deselect; allow first click to register
       this.cg.set({ selected: undefined });
     }
     setTimeout(() => this.debugReport('setSelected'), 10);
