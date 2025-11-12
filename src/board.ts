@@ -171,9 +171,19 @@ export class BoardController {
       ...(payload.orientation ? { orientation: payload.orientation } : {}),
     };
     this.cg.set(update);
-    // Reapply last known dots to avoid clearing by set()
-    if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
-    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+    try {
+      const st: any = (this.cg as any)?.state;
+      const movableColor = st?.movable?.color;
+      const isPlayersTurn = movableColor && movableColor !== 'both' && st?.turnColor === movableColor;
+      if (isPlayersTurn) {
+        if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
+        this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
+        this.lastPremoveMap = null;
+      } else {
+        this.cg.set({ movable: { dests: undefined, showDests: true } });
+        if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+      }
+    } catch {}
     try {
       const st: any = (this.cg as any)?.state;
       const movableColor = st?.movable?.color;
@@ -215,14 +225,37 @@ export class BoardController {
   setTurn(color: Color) {
     if (!this.cg) return;
     this.cg.set({ turnColor: color });
+    try {
+      const st: any = (this.cg as any)?.state;
+      const movableColor = st?.movable?.color;
+      const isPlayersTurn = movableColor && movableColor !== 'both' && st?.turnColor === movableColor;
+      if (isPlayersTurn) {
+        if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
+        this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
+        this.lastPremoveMap = null;
+      } else {
+        this.cg.set({ movable: { dests: undefined, showDests: true } });
+        if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+      }
+    } catch {}
   }
 
   setDraggable(enabled: boolean, playerColor: Color | 'both' = 'both') {
     if (!this.cg) return;
     this.cg.set({ draggable: { enabled }, movable: { color: playerColor } });
-    // Reapply dots after state changes
-    if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
-    if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+    try {
+      const st: any = (this.cg as any)?.state;
+      const movableColor = st?.movable?.color;
+      const isPlayersTurn = movableColor && movableColor !== 'both' && st?.turnColor === movableColor;
+      if (isPlayersTurn) {
+        if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
+        this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
+        this.lastPremoveMap = null;
+      } else {
+        this.cg.set({ movable: { dests: undefined, showDests: true } });
+        if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+      }
+    } catch {}
   }
 
   setFreeMode(free: boolean) {
@@ -234,6 +267,16 @@ export class BoardController {
 
   setPremoveDests(dests: Array<[Square, Square[]]>) {
     if (!this.cg) return;
+    try {
+      const st: any = (this.cg as any)?.state;
+      const movableColor = st?.movable?.color;
+      const isPlayersTurn = movableColor && movableColor !== 'both' && st?.turnColor === movableColor;
+      if (isPlayersTurn) {
+        this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
+        this.lastPremoveMap = null;
+        return;
+      }
+    } catch {}
     
     if (!dests || dests.length === 0) {
       // Clear premove dots if no destinations
@@ -259,10 +302,11 @@ export class BoardController {
       }
     }
     
-    // CRITICAL FIX: Use customDests instead of dests!
-    // premovable.dests = cg.Key[] (array for currently selected piece - internal use)
-    // premovable.customDests = cg.Dests (Map format - for providing custom destinations)
-    // This tells Chessground to use OUR calculated destinations instead of its internal premove() function
+    // Clear legal move dots before showing premove dots to avoid overlap
+    this.cg.set({ movable: { dests: undefined, showDests: true } });
+    this.lastLegalMap = null;
+
+    // Use customDests for our premove destinations
     this.cg.set({ premovable: { enabled: true, showDests: true, customDests: map } });
     this.lastPremoveMap = map;
     console.log('[MFE DBG] setPremoveDests applied entries=', map.size);
