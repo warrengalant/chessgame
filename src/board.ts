@@ -109,6 +109,8 @@ export class BoardController {
             // Clear any highlights after a successful move
             this.cg.set({ movable: { dests: undefined, showDests: true } });
             this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+            try { this.cg.set({ selected: undefined }); } catch {}
+            this.lastSelectedKey = null;
             this.lastLegalMap = null;
             this.lastPremoveMap = null;
           },
@@ -172,10 +174,17 @@ export class BoardController {
     // Reapply last known dots to avoid clearing by set()
     if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
     if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
-    // Restore last selected square so Chessground recomputes move-dest classes
-    if (this.lastSelectedKey) {
-      try { this.cg.set({ selected: this.lastSelectedKey }); } catch {}
-    }
+    try {
+      const st: any = (this.cg as any)?.state;
+      const movableColor = st?.movable?.color;
+      const isPlayersTurn = movableColor && movableColor !== 'both' && st?.turnColor === movableColor;
+      const recentUserSelect = Date.now() - this.lastSelectTs <= 800;
+      if (this.lastSelectedKey && isPlayersTurn && recentUserSelect) {
+        this.cg.set({ selected: this.lastSelectedKey });
+      } else {
+        this.cg.set({ selected: undefined });
+      }
+    } catch {}
     // Snapshot after DOM settles
     setTimeout(() => this.debugReport('setPosition'), 10);
   }
