@@ -32,6 +32,8 @@ export class BoardController {
   private suppressNextSelectEvent: boolean = false;
   // Save/restore current premove highlight between previews
   private savedPremCurrent: [Square, Square] | null = null;
+  // Only these actions may clear a premove: right-click, clicking/dragging premove origin
+  private allowPremoveClear: boolean = false;
 
   private debugReport(tag: string) {
     try {
@@ -79,6 +81,7 @@ export class BoardController {
       this.el.addEventListener('contextmenu', (e) => {
         try { e.preventDefault(); } catch {}
         try {
+          this.allowPremoveClear = true;
           const st: any = (this.cg as any)?.state;
           const cur: [Square, Square] | undefined = st?.premovable?.current;
           if (cur) {
@@ -90,6 +93,26 @@ export class BoardController {
         this.savedPremCurrent = null;
         this.lastPremoveMap = null;
       }, { passive: false });
+    } catch {}
+    // Click/drag on the premove ORIGIN square clears premove (allowed ways #1 and #2)
+    try {
+      this.el.addEventListener('pointerdown', (e: any) => {
+        try {
+          const target = e.target as HTMLElement | null;
+          if (!target) return;
+          const sqEl = target.closest('cg-square[data-key], square[data-key]') as HTMLElement | null;
+          if (!sqEl) return;
+          const key = (sqEl.getAttribute('data-key') || '') as Square;
+          const locked = this.savedPremCurrent as [Square, Square] | null;
+          if (locked && key && key === locked[0]) {
+            this.allowPremoveClear = true;
+            (this.cg as any)?.set({ premovable: { current: undefined, showDests: true } });
+            (this.cg as any)?.set({ premovable: { customDests: new Map(), showDests: true } });
+            this.savedPremCurrent = null;
+            this.lastPremoveMap = null;
+          }
+        } catch {}
+      }, { passive: true });
     } catch {}
   }
 
@@ -104,19 +127,6 @@ export class BoardController {
         blockTouchScroll: opts.blockTouchScroll !== false,
         draggable: { 
           enabled: true, distance: 0, autoDistance: true, showGhost: true,
-          // Drag start clears premove (second allowed way to clear)
-          events: {
-            start: () => {
-              try {
-                if (this.savedPremCurrent) {
-                  (this.cg as any).set({ premovable: { current: undefined, showDests: true } });
-                  (this.cg as any).set({ premovable: { customDests: new Map(), showDests: true } });
-                  this.savedPremCurrent = null;
-                  this.lastPremoveMap = null;
-                }
-              } catch {}
-            }
-          }
         } as any,
         selectable: { enabled: true },
         movable: { color: opts.playerColor || 'both', free: false, showDests: true },
@@ -149,11 +159,20 @@ export class BoardController {
               }
             },
             unset: () => {
-              // Clicking the premove clears it (first allowed way)
-              this.savedPremCurrent = null;
-              try {
-                (this.cg as any).set({ premovable: { customDests: new Map(), showDests: true } });
-              } catch {}
+              // Only clear if we explicitly allowed it (click/drag on origin or right-click)
+              if (this.allowPremoveClear) {
+                this.allowPremoveClear = false;
+                this.savedPremCurrent = null;
+                try {
+                  (this.cg as any).set({ premovable: { customDests: new Map(), showDests: true } });
+                } catch {}
+              } else {
+                // Not allowed: immediately restore the locked premove
+                const locked = this.savedPremCurrent as [Square, Square] | null;
+                if (locked && locked[0] && locked[1]) {
+                  try { (this.cg as any).set({ premovable: { current: locked, showDests: true } }); } catch {}
+                }
+              }
             }
           }
         } as any,
@@ -180,12 +199,14 @@ export class BoardController {
               try { console.log('[MFE DBG] select', key); } catch {}
               this.lastSelectTs = Date.now();
               this.lastSelectedKey = key;
-              // Temporarily hide existing premove current while previewing another piece
+              // Keep existing premove visible while previewing another piece
               try {
-                const cur = (this.cg as any)?.state?.premovable?.current as [Square, Square] | undefined;
-                if (cur && (!this.savedPremCurrent || (this.savedPremCurrent[0] !== cur[0] || this.savedPremCurrent[1] !== cur[1]))) {
-                  this.savedPremCurrent = [cur[0], cur[1]];
-                  (this.cg as any).set({ premovable: { current: undefined, showDests: true } });
+                const locked = this.savedPremCurrent as [Square, Square] | null;
+                if (locked && locked[0] && locked[1]) {
+                  (this.cg as any).set({ premovable: { current: locked, showDests: true } });
+                } else {
+                  const cur = (this.cg as any)?.state?.premovable?.current as [Square, Square] | undefined;
+                  if (cur) this.savedPremCurrent = [cur[0], cur[1]];
                 }
               } catch {}
               this.callbacks.onSelect(key);
@@ -251,6 +272,12 @@ export class BoardController {
         this.cg.set({ selected: undefined });
       }
     } catch {}
+    // Ensure premove current persists across position updates
+    try {
+      if (this.savedPremCurrent) {
+        this.cg.set({ premovable: { current: this.savedPremCurrent, showDests: true } });
+      }
+    } catch {}
     // Snapshot after DOM settles
     setTimeout(() => this.debugReport('setPosition'), 10);
   }
@@ -292,6 +319,12 @@ export class BoardController {
       } else {
         this.cg.set({ movable: { dests: undefined, showDests: true } });
         if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+      }
+    } catch {}
+    // Re-apply locked premove current after turn changes
+    try {
+      if (this.savedPremCurrent) {
+        this.cg.set({ premovable: { current: this.savedPremCurrent, showDests: true } });
       }
     } catch {}
   }
