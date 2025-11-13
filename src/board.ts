@@ -32,8 +32,6 @@ export class BoardController {
   private suppressNextSelectEvent: boolean = false;
   // Save/restore current premove highlight between previews
   private savedPremCurrent: [Square, Square] | null = null;
-  // Only these actions may clear a premove: right-click, clicking/dragging premove origin
-  private allowPremoveClear: boolean = false;
 
   private debugReport(tag: string) {
     try {
@@ -76,56 +74,6 @@ export class BoardController {
   constructor(el: HTMLElement, callbacks: BoardCallbacks) {
     this.el = el;
     this.callbacks = callbacks;
-    // Right-click anywhere on the board clears the premove (one of the allowed ways)
-    try {
-      this.el.addEventListener('contextmenu', (e) => {
-        try { e.preventDefault(); } catch {}
-        try {
-          this.allowPremoveClear = true;
-          const st: any = (this.cg as any)?.state;
-          const cur: [Square, Square] | undefined = st?.premovable?.current;
-          if (cur) {
-            (this.cg as any).set({ premovable: { current: undefined, showDests: true } });
-          }
-          // Also clear any premove dots
-          (this.cg as any)?.set({ premovable: { customDests: new Map(), showDests: true } });
-        } catch {}
-        this.savedPremCurrent = null;
-        this.lastPremoveMap = null;
-      }, { passive: false });
-    } catch {}
-    // Click/drag on the premove ORIGIN square clears premove (allowed ways #1 and #2)
-    try {
-      this.el.addEventListener('pointerdown', (e: any) => {
-        try {
-          const target = e.target as HTMLElement | null;
-          if (!target) return;
-          const sqEl = target.closest('cg-square[data-key], square[data-key]') as HTMLElement | null;
-          if (!sqEl) return;
-          const key = (sqEl.getAttribute('data-key') || '') as Square;
-          const locked = this.savedPremCurrent as [Square, Square] | null;
-          if (locked && key) {
-            if (key === locked[0]) {
-              // Allowed clear: clicking premove origin
-              this.allowPremoveClear = true;
-              (this.cg as any)?.set({ premovable: { current: undefined, showDests: true } });
-              (this.cg as any)?.set({ premovable: { customDests: new Map(), showDests: true } });
-              this.savedPremCurrent = null;
-              this.lastPremoveMap = null;
-            } else {
-              // Block interaction with other pieces entirely to avoid flicker/unset
-              try { e.preventDefault(); e.stopPropagation(); } catch {}
-              try {
-                this.cg.set({ selected: undefined });
-                this.cg.set({ movable: { dests: undefined, showDests: true } });
-                (this.cg as any).set({ premovable: { current: locked, showDests: true } });
-              } catch {}
-              return;
-            }
-          }
-        } catch {}
-      }, { passive: false });
-    } catch {}
   }
 
   init(opts: InitOptions = {}) {
@@ -137,9 +85,7 @@ export class BoardController {
         coordinates: opts.coordinates !== false,
         animation: { enabled: true, duration: animationMs },
         blockTouchScroll: opts.blockTouchScroll !== false,
-        draggable: { 
-          enabled: true, distance: 0, autoDistance: true, showGhost: true,
-        } as any,
+        draggable: { enabled: true, distance: 0, autoDistance: true, showGhost: true },
         selectable: { enabled: true },
         movable: { color: opts.playerColor || 'both', free: false, showDests: true },
         premovable: { 
@@ -149,43 +95,12 @@ export class BoardController {
           additionalPremoveRequirements: () => false,
           events: {
             set: (orig: Square, dest: Square) => {
-              // If a premove already exists, REJECT replacement: restore the original and deselect
-              try {
-                const st: any = (this.cg as any)?.state;
-                const current: [Square, Square] | undefined = st?.premovable?.current;
-                const locked = this.savedPremCurrent;
-                const hasExisting = !!(locked && locked[0] && locked[1]);
-                if (hasExisting && (!current || current[0] !== locked[0] || current[1] !== locked[1])) {
-                  // Restore the locked premove and clear the transient selection
-                  (this.cg as any).set({ premovable: { current: locked, showDests: true } });
-                  (this.cg as any).set({ selected: undefined });
-                  // Do NOT propagate a new premove selection
-                  return;
-                }
-              } catch {}
-              // First-time premove: accept and lock it
               try { console.log('[MFE DBG] premoveSelect event from Chessground', orig, '→', dest); } catch {}
-              this.savedPremCurrent = [orig, dest];
               if (this.callbacks.onPremoveSelect) {
                 this.callbacks.onPremoveSelect({ from: orig, to: dest });
               }
             },
-            unset: () => {
-              // Only clear if we explicitly allowed it (click/drag on origin or right-click)
-              if (this.allowPremoveClear) {
-                this.allowPremoveClear = false;
-                this.savedPremCurrent = null;
-                try {
-                  (this.cg as any).set({ premovable: { customDests: new Map(), showDests: true } });
-                } catch {}
-              } else {
-                // Not allowed: immediately restore the locked premove
-                const locked = this.savedPremCurrent as [Square, Square] | null;
-                if (locked && locked[0] && locked[1]) {
-                  try { (this.cg as any).set({ premovable: { current: locked, showDests: true } }); } catch {}
-                }
-              }
-            }
+            unset: () => {}
           }
         } as any,
         highlight: { lastMove: true, check: true },
@@ -211,15 +126,14 @@ export class BoardController {
               try { console.log('[MFE DBG] select', key); } catch {}
               this.lastSelectTs = Date.now();
               this.lastSelectedKey = key;
-              // If a premove is locked, block selecting other pieces: clear their highlights immediately
-              const locked = this.savedPremCurrent as [Square, Square] | null;
-              if (locked && locked[0] && key !== locked[0]) {
-                try {
-                  this.cg.set({ selected: undefined });
-                  this.cg.set({ movable: { dests: undefined, showDests: true } });
-                } catch {}
-                return; // Do NOT propagate selection; keep only the original premove highlight
-              }
+              // Temporarily hide existing premove current while previewing another piece
+              try {
+                const cur = (this.cg as any)?.state?.premovable?.current as [Square, Square] | undefined;
+                if (cur && (!this.savedPremCurrent || (this.savedPremCurrent[0] !== cur[0] || this.savedPremCurrent[1] !== cur[1]))) {
+                  this.savedPremCurrent = [cur[0], cur[1]];
+                  (this.cg as any).set({ premovable: { current: undefined, showDests: true } });
+                }
+              } catch {}
               this.callbacks.onSelect(key);
             } else {
               // Ignore immediate deselects right after a select to prevent flicker
@@ -228,13 +142,14 @@ export class BoardController {
               this.callbacks.onSelect(null);
               // Clear dots locally on user deselect
               this.cg.set({ movable: { dests: undefined, showDests: true } });
-              this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
+              this.cg.set({ premovable: { customDests: undefined, showDests: true } });
               this.lastLegalMap = null;
               this.lastPremoveMap = null;
               this.lastSelectedKey = null;
-              // Ensure premove highlight remains if it exists
+              // Restore previously hidden premove current highlight
               if (this.savedPremCurrent) {
                 try { (this.cg as any).set({ premovable: { current: this.savedPremCurrent, showDests: true } }); } catch {}
+                this.savedPremCurrent = null;
               }
             }
           },
@@ -282,12 +197,6 @@ export class BoardController {
         this.cg.set({ selected: undefined });
       }
     } catch {}
-    // Ensure premove current persists across position updates
-    try {
-      if (this.savedPremCurrent) {
-        this.cg.set({ premovable: { current: this.savedPremCurrent, showDests: true } });
-      }
-    } catch {}
     // Snapshot after DOM settles
     setTimeout(() => this.debugReport('setPosition'), 10);
   }
@@ -329,12 +238,6 @@ export class BoardController {
       } else {
         this.cg.set({ movable: { dests: undefined, showDests: true } });
         if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
-      }
-    } catch {}
-    // Re-apply locked premove current after turn changes
-    try {
-      if (this.savedPremCurrent) {
-        this.cg.set({ premovable: { current: this.savedPremCurrent, showDests: true } });
       }
     } catch {}
   }
