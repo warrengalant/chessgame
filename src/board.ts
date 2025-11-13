@@ -90,7 +90,7 @@ export class BoardController {
         movable: { color: opts.playerColor || 'both', free: false, showDests: true },
         premovable: { 
           enabled: true, 
-          showDests: true, 
+          showDests: false, 
           castle: true,
           additionalPremoveRequirements: () => false,
           events: {
@@ -109,7 +109,7 @@ export class BoardController {
             this.callbacks.onMove({ from: orig, to: dest });
             // Clear any highlights after a successful move
             this.cg.set({ movable: { dests: undefined, showDests: true } });
-            this.cg.set({ premovable: { customDests: undefined, showDests: true } });
+            this.cg.set({ premovable: { customDests: undefined, showDests: false } });
             try { this.cg.set({ selected: undefined }); } catch {}
             this.lastSelectedKey = null;
             this.lastLegalMap = null;
@@ -179,11 +179,11 @@ export class BoardController {
       const isPlayersTurn = movableColor && movableColor !== 'both' && st?.turnColor === movableColor;
       if (isPlayersTurn) {
         if (this.lastLegalMap) this.cg.set({ movable: { dests: this.lastLegalMap, showDests: true } });
-        this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
+        this.cg.set({ premovable: { customDests: new Map(), showDests: false } });
         this.lastPremoveMap = null;
       } else {
         this.cg.set({ movable: { dests: undefined, showDests: true } });
-        if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: true } });
+        if (this.lastPremoveMap) this.cg.set({ premovable: { customDests: this.lastPremoveMap, showDests: false } });
       }
     } catch {}
     try {
@@ -217,7 +217,7 @@ export class BoardController {
     }
     this.cg.set({ movable: { dests: filtered, showDests: true } });
     // Clear premove dots when setting legal dots (your turn)
-    this.cg.set({ premovable: { customDests: new Map(), showDests: true } });
+    this.cg.set({ premovable: { customDests: new Map(), showDests: false } });
     this.lastLegalMap = filtered;
     this.lastPremoveMap = null;
     console.log('[MFE DBG] setLegalDests applied entries=', filtered.size);
@@ -310,7 +310,7 @@ export class BoardController {
     this.lastLegalMap = null;
 
     // Use customDests for our premove destinations
-    this.cg.set({ premovable: { enabled: true, showDests: true, customDests: map } });
+    this.cg.set({ premovable: { enabled: true, showDests: false, customDests: map } });
     this.lastPremoveMap = map;
     console.log('[MFE DBG] setPremoveDests applied entries=', map.size);
     setTimeout(() => this.debugReport('setPremoveDests'), 10);
